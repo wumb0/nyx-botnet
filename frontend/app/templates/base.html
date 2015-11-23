@@ -11,7 +11,7 @@
         <meta charset="utf-8">
         <meta http-squiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        {% if g.user.is_authenticated %}
+        {% if g.user.is_authenticated() %}
         <link rel="stylesheet" href="{{url_for('static', filename='boots/css/bootstrap.min.css')}}">
         {% else %}
         <link rel="stylesheet" href="{{url_for('static', filename='boots/css/bootstrap.css')}}">
@@ -36,7 +36,7 @@
             </div>
             <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    {% if g.user.is_authenticated %}
+                    {% if g.user.is_authenticated() %}
                     <li id="logout"><a href="{{url_for('security.logout')}}"><i class="fa fa-sign-out"></i> Logout</a></li>
                     {% else %}
                     <li id="login"><a href="{{url_for('security.login')}}"><i class="fa fa-sign-in"></i> Login</a></li>
