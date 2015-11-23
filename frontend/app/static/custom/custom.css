@@ -1,0 +1,13 @@
+.top-pad { padding-top: 75px; }
+.login-box {
+    background-color: #585858;
+    text-align: center;
+}
+.field-sep { margin-top: 10px; }
+.jumbotron {
+    padding-left: 1em;
+    padding-right: 1em;
+}
+.logo {
+    max-width: 100px;
+}
