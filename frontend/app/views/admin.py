@@ -1,14 +1,11 @@
-from app import app, db, models
-from flask_admin.contrib.fileadmin import FileAdmin
 from flask.ext.admin import AdminIndexView, BaseView
 from flask.ext.admin.contrib.sqla.view import ModelView
-from flask.ext.login import current_user as user
+from flask.ext.security import current_user as user
 from flask import redirect, url_for, flash
-from app.models import Post
 
 class ProtectedBaseView(BaseView):
     def is_accessible(self):
-        if user.is_authenticated and user.is_admin():
+        if user.is_authenticated():
             return True
         return False
 
@@ -23,8 +20,7 @@ class ProtectedModelView(ModelView, ProtectedBaseView):
 class ProtectedIndexView(AdminIndexView, ProtectedBaseView):
     pass
 
-class ProtectedFileAdmin(FileAdmin, ProtectedBaseView):
-    pass
-
 class UserModelView(ProtectedModelView):
-    pass
+    column_exclude_list = ['password']
+    form_excluded_columns = ['password', 'last_login_at', 'current_login_at',
+                             'last_login_ip', 'current_login_ip', 'login_count']

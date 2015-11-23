@@ -24,12 +24,10 @@ try:
     userstore.create_user(email="root@localhost", password="pwnsauce")
     db.session.commit()
 except: pass
-from app.views import main
+from app.views import main, admin
 
 #admin setup
-'''
 _admin = Admin(app, 'NYX Admin', template_mode='bootstrap3',
               index_view=admin.ProtectedIndexView())
 _admin.add_link(MenuLink(name='Back to Site', url='/'))
 _admin.add_view(admin.UserModelView(models.User, db.session))
-'''
