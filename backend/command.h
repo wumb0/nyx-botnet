@@ -17,7 +17,7 @@ typedef struct
 
 #endif
 
-Command *cmd_queue(Command *cmd, Commands cmds);
+int *cmd_queue(Command *cmd, Commands cmds);
 
 Command *cmd_dequeue(Commands cmd);
 

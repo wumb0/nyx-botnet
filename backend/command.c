@@ -1,6 +1,6 @@
 #include "command.h"
 
-Command *cmd_queue(Command *cmd, Commands cmds){
+int *cmd_queue(Command *cmd, Commands cmds){
     if ( cmds.cmd_start == (void *)0 ) {
         cmds.cmd_start = cmd;
         cmds.queue_len++;
@@ -10,6 +10,7 @@ Command *cmd_queue(Command *cmd, Commands cmds){
     if ( c != (void *)0 ) {
         cmds.queue_len++;
     }
+    return 0;
 }
 
 
@@ -51,12 +52,12 @@ Command *cmd_append(Command *cmd, Command *start) {
         return (void *)0;
     }
     
-    Command cur = *start;
-    while ( cur.next != (void *)0 ){
-        cur = (*cur.next);
+    Command *cur = start;
+    while ( cur->next != (void *)0 ){
+        cur = cur->next;
     }
-    cur.next = cmd;
-    return &cur;
+    cur->next = cmd;
+    return cur;
 }
 
 
