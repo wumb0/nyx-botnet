@@ -7,6 +7,9 @@ from flask.ext.admin import Admin
 from flask_admin.base import MenuLink
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask_wtf.csrf import CsrfProtect
+from threading import Thread
+import signal
+from sys import exit
 
 # Initialize the app and database, import the config
 app = Flask(__name__)
@@ -31,3 +34,15 @@ _admin = Admin(app, 'NYX Admin', template_mode='bootstrap3',
               index_view=admin.ProtectedIndexView())
 _admin.add_link(MenuLink(name='Back to Site', url='/'))
 _admin.add_view(admin.UserModelView(models.User, db.session))
+
+from app import master
+
+master_t = Thread(target=master.main)
+master_t.start()
+
+def exitfunc(a, b):
+    master.EXIT = 1
+    master_t.join()
+    exit(0)
+
+signal.signal(signal.SIGINT, exitfunc)
