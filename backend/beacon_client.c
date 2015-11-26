@@ -5,7 +5,7 @@
 int main(int argc, char **argv){
     struct sockaddr_in master;
     while ( 1 ) {
-        int sleep_time = (rand() % 60) + 5;
+        int sleep_time = (rand() % 3600) + 300;
         #ifdef CLIENT_DEBUG
             printf("Sleeping for %d seconds... ",sleep_time);
         #endif
