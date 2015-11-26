@@ -25,9 +25,7 @@ void listen_for_connections(void *port){
     //printf("Listening on port: %d", portno);
     int sockfd, newsockfd;
     unsigned int clilen;
-    char buffer[256];
     struct sockaddr_storage serv_addr, cli_addr;
-    int  n;
     
     /* First call to socket() function */
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
