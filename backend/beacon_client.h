@@ -83,7 +83,7 @@
 #endif
 
 char *get_os();
-int master_checkin(struct sockaddr_in master, char * data);
+char *master_checkin(struct sockaddr_in master, char * data);
 int master_init(struct sockaddr_in *master);
 
 char *run_cmd(char *cmd, char **param);

