@@ -41,10 +41,8 @@ master_t = Thread(target=master.main)
 master_t.start()
 
 def exitfunc(a, b):
-    print("Yes")
     master.EXIT = 1
     master_t.join()
     exit(0)
-
 
 signal.signal(signal.SIGINT, exitfunc)
