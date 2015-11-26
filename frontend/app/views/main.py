@@ -1,4 +1,4 @@
-from app import app
+from app import app, master
 from flask import render_template, g, abort
 from flask.ext.security import current_user, login_required
 

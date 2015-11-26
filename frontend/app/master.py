@@ -1,9 +1,11 @@
-from threading import Thread
+from threading import Thread, Lock
 import socket
 from select import select
 from functools import wraps
 
 EXIT = 0
+clients = {}
+mutex = Lock()
 
 def thread(func):
     @wraps(func)
@@ -15,15 +17,24 @@ def thread(func):
 
 def main(port=8080):
     s = socket.socket()
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(("0.0.0.0", port))
     s.listen(100)
     while not EXIT:
         inp = select([s], [], [], 1)
         if inp[0]:
             (csock, addr) = s.accept()
-            handle_client(csock)
+            print("Conn: "+addr[0])
+            handle_client(csock, addr)
 
 @thread
-def handle_client(sock):
-    sock.send("hi dad")
+def handle_client(sock, addr):
+    print clients
+    if not addr[0] in clients.keys():
+        clients[addr[0]] = list()
+    inp = select([sock], [], [], 1)
+    if inp[0]:
+        print(sock.recv(2048))
+    if len(clients[addr[0]]) != 0:
+        sock.send(clients[addr[0]].pop())
     sock.close()
