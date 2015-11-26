@@ -70,7 +70,7 @@ void listen_for_connections(void *port){
         //struct sockaddr_storage *new_sock = (struct sockaddr_storage *)malloc(sizeof(struct sockaddr_storage));
         //memcpy(new_sock,&cli_addr,sizeof(struct sockaddr_storage));
         char *addr = inet_ntoa(client_addr_in.sin_addr);
-        char *new_addr = (char *)malloc(sizeof(char)*strlen(addr)+1);
+        char *new_addr = (char *)malloc(sizeof(char)*(strlen(addr)+1));
         strncpy(new_addr,addr,strlen(addr));
         printf("\nClient %s connected.. Checking if they have connected before... \n",new_addr);
         if ( ( cli = client_exists(clients, new_addr,  client_count ) ) == NULL ) {
