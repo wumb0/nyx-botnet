@@ -3,6 +3,8 @@
 #define MASTER_IP "127.0.0.1"
 #define MASTER_PORT 8080
 #define MASTER_RECV_SIZE 4096
+#define SLEEP_BASE 30
+#define SLEEP_MAX 120
 #ifdef _WIN32
     #warning "Compiling for Windows!"
     #define __windows__ //consistency
