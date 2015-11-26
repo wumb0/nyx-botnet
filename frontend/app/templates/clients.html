@@ -29,8 +29,9 @@ window.setInterval(function(){
             $("#tb").html("");
             $.each(data, function(i, bot) {
                 $("#tb").append('<tr id="row' + i + '"><td>' + i + "</td><td>" + bot.IP + "</td><td>" + Math.round(bot.last_seen) + "</td>");
-                $("#row"+i).dblclick(function() {
+                $("#row"+i).dblclick(function(e) {
                         alert("Double click event");
+                        e.preventDefault();
                 });
             });
         }
