@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-striped table-hover table-responsive table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>IP Address</th>
+                    <th>Last Seen (Seconds)</th>
+                </tr>
+            </thead>
+            <tbody id="tb">
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock content %}
+
+{% block footer %}
+<script>
+window.setInterval(function(){
+    $.ajax({
+        url: '/api/clients/list',
+        type: 'GET',
+        dataType: 'json',
+        contentType: "application/json",
+        success: function (data, textStatus, xhr) {
+            $("#tb").html("");
+            $.each(data, function(i, bot) {
+                $("#tb").append('<tr id="row' + i + '"><td>' + i + "</td><td>" + bot.IP + "</td><td>" + Math.round(bot.last_seen) + "</td>");
+                $("#row"+i).dblclick(function() {
+                        alert("Double click event");
+                });
+            });
+        }
+    });
+}, 1000);
+</script>
+{% endblock footer %}
