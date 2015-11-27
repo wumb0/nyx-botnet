@@ -37,6 +37,8 @@
             <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     {% if g.user.is_authenticated() %}
+                    <li id="bots"><a href="{{url_for('bots')}}"><i class="fa fa-dashboard"></i> Bots</a></li>
+                    <li id="admin"><a href="{{url_for('admin.index')}}"><i class="fa fa-cog"></i> Admin</a></li>
                     <li id="logout"><a href="{{url_for('security.logout')}}"><i class="fa fa-sign-out"></i> Logout</a></li>
                     {% else %}
                     <li id="login"><a href="{{url_for('security.login')}}"><i class="fa fa-sign-in"></i> Login</a></li>
