@@ -50,4 +50,4 @@ def api_clients():
 @app.route("/bots")
 @login_required
 def bots():
-    return render_template("clients.html", title="Bots")
+    return render_template("bots.html", title="Bots")
