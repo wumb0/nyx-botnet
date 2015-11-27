@@ -1,4 +1,9 @@
 .top-pad { padding-top: 75px; }
+.tab-content { 
+    padding-top: 30px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
 .login-box {
     background-color: #585858;
     text-align: center;

