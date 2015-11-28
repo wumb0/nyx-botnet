@@ -74,7 +74,6 @@ def api_clients_sleep():
 @app.route("/api/clients/delete/<int:id>")
 @login_required
 def api_clients_delete(id):
-    print(id)
     try:
         bot = Bot.query.filter_by(id=id).one()
     except: return "", 500
