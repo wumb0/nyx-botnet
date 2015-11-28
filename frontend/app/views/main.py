@@ -49,6 +49,7 @@ def api_clients_list():
         data[bot.id]["last_seen"] = bot.last_seen
         data[bot.id]["last_response"] = bot.last_response
         data[bot.id]["set_interval"] = bot.sleep_interval
+        data[bot.id]['cmd_queue'] = g.queue[bot.ip]
     return json.dumps(data)
 
 @app.route("/api/clients/cmd/<int:id>", methods=["POST"])
@@ -57,6 +58,13 @@ def api_clients_cmd(id):
     data = json.loads(request.get_data())
     bot = Bot.query.filter_by(id=id).one()
     g.queue[bot.ip].append("run:"+data['cmd'])
+    return "", 200
+
+@app.route("/api/clients/clearq/<int:id>")
+@login_required
+def api_clients_clearq(id):
+    bot = Bot.query.filter_by(id=id).one()
+    del g.queue[bot.ip][:]
     return "", 200
 
 @app.route("/api/clients/sleep/<int:id>", methods=["POST"])

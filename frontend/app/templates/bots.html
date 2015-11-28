@@ -14,6 +14,7 @@
                         <i id="OSicon"></i><h3 id="cliOS"></h3>
                     </div>
                     <div class="col-md-6">
+                        <button id="clearqBot" type="button" class="btn btn-info pull-right">Clear Queue</button>
                         <button id="delBot" type="button" class="btn btn-danger pull-right">Delete</button>
                     </div>
                 </div>
@@ -22,12 +23,16 @@
                         <div class="tabbable">
                             <ul class="nav nav-tabs">
                                 <li class="active"><a href="#last-response" data-toggle="tab">Last Response</a></li>
+                                <li><a href="#command-queue" data-toggle="tab">Command Queue</a></li>
                                 <li><a href="#run-command" data-toggle="tab">Run Command</a></li>
                                 <li><a href="#sleep-interval" data-toggle="tab">Sleep Interval</a></li>
                             </ul>
                             <div class="tab-content">
                                 <div class="tab-pane active" id="last-response">
-                                    <pre id="lastResponse">Data 1</pre>
+                                    <pre id="lastResponse"></pre>
+                                </div>
+                                <div class="tab-pane" id="command-queue">
+                                    <pre id="cmdq"></pre>
                                 </div>
                                 <div class="tab-pane" id="run-command">
                                     {{cmd_form.command.label}} {{cmd_form.command}}
@@ -51,6 +56,7 @@
     <div class="col-md-12">
         <button class="btn btn-info" id="cmdall" type="button">Command On Selected</button>
         <button class="btn btn-info" id="sleepall" type="button">Set Sleep On Selected</button>
+        <button class="btn btn-info" id="clearqall" type="button">Clear Queue On Selected</button>
         <button class="btn btn-danger" id="delall" type="button">Delete Selected</button>
     </div>
 </div>
@@ -84,10 +90,12 @@ $(document).ready(function() {
     $('a[data-toggle="tab"]').on('shown.bs.tab', modal_tabs);
     $('#submit-btn').click(submit_to_api);
     $('#delBot').click(delete_bot);
+    $('#clearqBot').click(clearq_bot);
     $('input:checkbox[name="allbot"]').click(select_all_checkboxes);
     $('#delall').click(delete_all_checked);
     $('#cmdall').click(command_all_checked);
     $('#sleepall').click(sleep_all_checked);
+    $('#clearqall').click(clearq_all_checked);
 });
 </script>
 {% endblock footer %}
