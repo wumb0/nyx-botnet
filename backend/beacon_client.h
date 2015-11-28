@@ -86,6 +86,12 @@
     #define OS "Unix"
     #define ID_CMD "uname -a"
     #include <unistd.h>
+    #include <arpa/inet.h> //inet_ntoa
+    #include <netinet/in.h> //in_addr
+    #include <sys/socket.h> //socket
+    #include <sys/wait.h>
+    #include <strings.h>
+    #include <string.h> //strlen
 #else
 #   error "Unsupported OS"
 #endif
