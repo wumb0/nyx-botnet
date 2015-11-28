@@ -74,6 +74,12 @@
     #define OS "Linux"
     #define ID_CMD "cat /etc/*releases || lsb_release -a || cat /proc/version"
     #include <unistd.h>
+    #include <arpa/inet.h> //inet_ntoa
+    #include <netinet/in.h> //in_addr
+    #include <sys/socket.h> //socket
+    #include <sys/wait.h>
+    #include <strings.h>
+    #include <string.h> //strlen
 #elif __unix__
     #warning "Compiling for Unix!"
     #define SHELL "/bin/sh"
