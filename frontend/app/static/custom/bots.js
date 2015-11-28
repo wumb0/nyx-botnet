@@ -38,9 +38,7 @@ function clients_list(){
                             symbol = "fa-apple";
                         }
                     }
-                    $("#delBot").data("botid", i);
-                    $('#cmdip').val(bot.IP);
-                    $('#intip').val(bot.IP);
+                    $('#botid').val(i);
                     $('#lastResponse').html(bot.last_response);
                     $('#cliOS').html("<i class=\"fa " + symbol + "\"></i> " + bot.OS);
                     $('#modal-pop').modal('toggle');
@@ -73,12 +71,12 @@ function submit_to_api(e){
     var endp = "";
     var jdata = "";
     if (target == "run-command"){
-        target = "/api/clients/cmd";
-        jdata = JSON.stringify({'IP': $("#cmdip").val(), 'cmd': $('#command').val()});
+        target = "/api/clients/cmd/" + $('#botid').val();
+        jdata = JSON.stringify({'cmd': $('#command').val()});
     }
     if (target == "sleep-interval"){
-        target = "/api/clients/sleep";
-        jdata = JSON.stringify({'IP': $("#intip").val(), 'interval': $('#interval').val()});
+        target = "/api/clients/sleep/" + $('#botid').val();
+        jdata = JSON.stringify({'interval': $('#interval').val()});
     }
     $.ajax({
         url: target,
@@ -88,7 +86,7 @@ function submit_to_api(e){
         data: jdata,
         success: function (data, textStatus, xhr) {
             $('#modal-pop').modal('toggle');
-            $("#last-response").tab("show");
+            $('.nav-tabs a[href="#last-response"]').tab('show')
             $('#interval').val("");
             $('#command').val("");
             if (target == "sleep-interval"){
@@ -100,7 +98,7 @@ function submit_to_api(e){
 
 function delete_bot(e){
     $.ajax({
-        url: '/api/clients/delete/' + $('#delBot').data("botid"),
+        url: '/api/clients/delete/' + $('#botid').val(),
         type: 'GET',
         success: function (data, textStatus, xhr) {
             $('#modal-pop').modal('toggle');
@@ -111,5 +109,46 @@ function delete_bot(e){
 function select_all_checkboxes(e){
     $('input:checkbox[name="botcb"]').each(function(){
         $(this).prop("checked", $('input:checkbox[name="allbot"]').prop("checked"));
+    });
+}
+
+function delete_all_checked(e){
+    if (!confirm("Are you sure you want to delete all checked bots?")){
+        return;
+    }
+    $('input:checkbox[name="botcb"]:checked').each(function(){
+        $.ajax({
+            url: '/api/clients/delete/' + $(this).prop("value"),
+            type: 'GET',
+        });
+    });
+}
+
+function command_all_checked(e){
+    var cmd = prompt("What command would you like to run?");
+    $('input:checkbox[name="botcb"]:checked').each(function(){
+        $.ajax({
+            url: '/api/clients/cmd/' + $(this).prop("value"),
+            type: 'POST',
+            dataType: 'text',
+            contentType: "application/json",
+            data: JSON.stringify({'cmd': cmd}),
+        });
+    });
+}
+
+function sleep_all_checked(e){
+    var interval = prompt("What do you want to set the sleep interval to?");
+    $('input:checkbox[name="botcb"]:checked').each(function(){
+        $.ajax({
+            url: '/api/clients/sleep/' + $(this).prop("value"),
+            type: 'POST',
+            dataType: 'text',
+            contentType: "application/json",
+            data: JSON.stringify({'interval': interval}),
+            success: function (data, textStatus, xhr) {
+                $("td.intervaltd").val(interval);
+            }
+        });
     });
 }

