@@ -16,9 +16,10 @@ function clients_list(){
         dataType: 'json',
         contentType: "application/json",
         success: function (data, textStatus, xhr) {
+            var check = $('input:checkbox[name=botcb]:checked').get();
             $("#tb").html("");
             $.each(data, function(i, bot) {
-                $("#tb").append('<tr id="row' + i + '"><td>' + i + "</td><td>" + bot.IP + "</td><td>" + bot.OS + "</td><td id=\"intervaltd\">" + bot.set_interval + "</td><td>" + Math.round(bot.last_seen) + "</td>");
+                $("#tb").append('<tr id="row' + i + '"><td><input type="checkbox" name="botcb" value="' + i + '"> ' + i + "</td><td>" + bot.IP + "</td><td>" + bot.OS + "</td><td id=\"intervaltd\">" + bot.set_interval + "</td><td>" + Math.round(bot.last_seen) + "</td>");
                 $("#row"+i).dblclick(function(e){
                     e.preventDefault();
                     $('.modal-title').html(bot.IP);
@@ -44,6 +45,9 @@ function clients_list(){
                     $('#cliOS').html("<i class=\"fa " + symbol + "\"></i> " + bot.OS);
                     $('#modal-pop').modal('toggle');
                 });
+            });
+            $.each(check, function(){
+                $('input:checkbox[name=botcb][value=' + this.value + ']').prop("checked", true);
             });
         }
     });
@@ -101,5 +105,11 @@ function delete_bot(e){
         success: function (data, textStatus, xhr) {
             $('#modal-pop').modal('toggle');
         }
+    });
+}
+
+function select_all_checkboxes(e){
+    $('input:checkbox[name="botcb"]').each(function(){
+        $(this).prop("checked", $('input:checkbox[name="allbot"]').prop("checked"));
     });
 }
