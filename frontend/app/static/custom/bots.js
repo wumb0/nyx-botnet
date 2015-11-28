@@ -81,6 +81,8 @@ function submit_to_api(e){
         data: jdata,
         success: function (data, textStatus, xhr) {
             $('#modal-pop').modal('toggle');
+            $('#interval').val("");
+            $('#command').val("");
             if (target == "sleep-interval"){
                 $("td.intervaltd").val($('#interval').val());
             }
