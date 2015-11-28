@@ -58,7 +58,7 @@ function clients_list(){
 
 function modal_tabs(e) {
     var target = $(e.target).attr("href")
-    if (target == "#last-response"){
+    if (target == "#last-response" || target == "#command-queue"){
         $('#submit-btn').hide();
     }
     if (target == "#run-command"){
