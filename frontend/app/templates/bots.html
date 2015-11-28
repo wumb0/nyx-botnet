@@ -9,8 +9,11 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <i id="OSicon"></i><h3 id="cliOS"></h3>
+                    </div>
+                    <div class="col-md-6">
+                        <button data-botid="0" id="delBot" type="button" class="btn btn-danger pull-right">Delete</button>
                     </div>
                 </div>
                 <div class="row">
@@ -74,6 +77,8 @@ $(document).ready(function() {
     window.setInterval(clients_list, 1000);
     $('a[data-toggle="tab"]').on('shown.bs.tab', modal_tabs);
     $('#submit-btn').click(submit_to_api);
+    $('#delBot').click(delete_bot);
+
 });
 </script>
 {% endblock footer %}
