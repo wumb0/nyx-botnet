@@ -67,7 +67,7 @@ def api_clients_sleep(id):
     except: return "", 500
     bot = Bot.query.filter_by(id=id).one()
     g.queue[bot.ip].append("set sleep:"+data['interval'])
-    bot.sleep_interval = data['interval']
+    bot.sleep_interval = int(data['interval'])
     db.session.add(bot)
     db.session.commit()
     return "", 200
