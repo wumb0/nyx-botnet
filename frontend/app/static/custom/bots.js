@@ -165,7 +165,7 @@ function delete_all_checked(e){
 }
 
 function kill_all_checked(e){
-    if (!confirm("Are you sure you want to delete all checked bots?")){
+    if (!confirm("Are you sure you want to kill all checked bots?")){
         return;
     }
     $('input:checkbox[name="botcb"]:checked').each(function(){
