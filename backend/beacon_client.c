@@ -179,18 +179,20 @@ char *run_cmd(char *cmd,char **param) {
         close(pipes[1]);
         #if defined(__apple__) || defined(__linux__) || defined(__unix__)
             if (param) {
-                execv(cmd,param);
+                execvp(cmd,param);
             } else {
-                execl(cmd,"");
+                execlp(cmd,"");
             }
         #elif __windows__
             _execv(cmd,param);
         #endif
     } else {
         close(pipes[1]);
-        int nbytes = read(pipes[0], buf, BUF_SIZE);
         #ifdef CLIENT_DEBUG
+            int nbytes = read(pipes[0], buf, BUF_SIZE);
             printf("[run_cmd] CMD ran: %s, Params[0]: %s, Output (%d bytes): %s\n", cmd, param[0], nbytes, buf);
+        #else
+            read(pipes[0], buf, BUF_SIZE);
         #endif
         wait(NULL);
     }
