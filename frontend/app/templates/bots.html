@@ -77,7 +77,7 @@
             <tbody id="tb">
                 {% for bot in bots %}
                 <tr id="row{{bot.id}}">
-                    <td><input type="checkbox" name="botcb" value="{{bot.id}}"></td>
+                    <td><input type="checkbox" name="botcb" value="{{bot.id}}">{{bot.id}}</td>
                     <td>{{bot.ip}}</td>
                     <td>{{bot.os}}</td>
                     <td id=\"intervaltd\">{{bot.sleep_interval}}</td>
