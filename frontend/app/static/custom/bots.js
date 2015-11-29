@@ -20,12 +20,16 @@ function clients_list(){
             $("#tb").html("");
             $.each(data, function(i, bot) {
                 $("#tb").append('<tr id="row' + i + '"><td><input type="checkbox" name="botcb" value="' + i + '"> ' + i + "</td><td>" + bot.IP + "</td><td>" + bot.OS + "</td><td id=\"intervaltd\">" + bot.set_interval + "</td><td>" + Math.round(bot.last_seen) + "</td>");
-                $("#row"+i).dblclick(function(e){
-                    e.preventDefault();
-                    $('.modal-title').html(bot.IP);
-                    set_modal_data(i, bot);
-                    $('#modal-pop').modal('toggle');
-                });
+                if ($.inArray('killkillkill', bot.cmd_queue) == -1){
+                    $("#row"+i).dblclick(function(e){
+                        e.preventDefault();
+                        $('.modal-title').html(bot.IP);
+                        set_modal_data(i, bot);
+                        $('#modal-pop').modal('toggle');
+                    });
+                } else {
+                    $('#row'+i).wrap("<del></del>");
+                }
                 if (($("#modal-pop").data('bs.modal') || {}).isShown){
                     set_modal_data(i, bot);
                 }
@@ -56,14 +60,14 @@ function get_symbol(bot){
     return symbol;
 }
 
-function set_modal_data(i, bot, symbol){
+function set_modal_data(i, bot){
     var q = "";
     $.each(bot.cmd_queue, function(j, cmd){
         q += j+1 + ". " + cmd + "\n";
     });
     $('#cmdq').html(q);
     $('#botid').val(i);
-    $('#lastResponse').html(bot.last_response);
+    $('#lastResponse').html("Command: " + bot.last_command + "\nResponse:\n" + bot.last_response);
     $('#cliOS').html("<i class=\"fa " + get_symbol(bot) + "\"></i> " + bot.OS);
 }
 

