@@ -15,6 +15,7 @@
                     </div>
                     <div class="col-md-6">
                         <button id="clearqBot" type="button" class="btn btn-info pull-right">Clear Queue</button>
+                        <button id="killBot" type="button" class="btn btn-danger pull-right">Kill</button>
                         <button id="delBot" type="button" class="btn btn-danger pull-right">Delete</button>
                     </div>
                 </div>
@@ -57,6 +58,7 @@
         <button class="btn btn-info" id="cmdall" type="button">Command On Selected</button>
         <button class="btn btn-info" id="sleepall" type="button">Set Sleep On Selected</button>
         <button class="btn btn-info" id="clearqall" type="button">Clear Queue On Selected</button>
+        <button class="btn btn-danger" id="killall" type="button">Kill Selected</button>
         <button class="btn btn-danger" id="delall" type="button">Delete Selected</button>
     </div>
 </div>
@@ -90,9 +92,11 @@ $(document).ready(function() {
     $('a[data-toggle="tab"]').on('shown.bs.tab', modal_tabs);
     $('#submit-btn').click(submit_to_api);
     $('#delBot').click(delete_bot);
+    $('#killBot').click(kill_bot);
     $('#clearqBot').click(clearq_bot);
     $('input:checkbox[name="allbot"]').click(select_all_checkboxes);
     $('#delall').click(delete_all_checked);
+    $('#killall').click(kill_all_checked);
     $('#cmdall').click(command_all_checked);
     $('#sleepall').click(sleep_all_checked);
     $('#clearqall').click(clearq_all_checked);

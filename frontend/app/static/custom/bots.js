@@ -23,37 +23,48 @@ function clients_list(){
                 $("#row"+i).dblclick(function(e){
                     e.preventDefault();
                     $('.modal-title').html(bot.IP);
-                    var symbol = "fa-question";
-                    if (bot.OS){
-                        if (bot.OS.toLowerCase().indexOf("linux") >= 0){
-                            symbol = "fa-linux";
-                        }
-                        if (bot.OS.toLowerCase().indexOf("unix") >= 0){
-                            symbol = "fa-terminal";
-                        }
-                        if (bot.OS.toLowerCase().indexOf("windows") >= 0){
-                            symbol = "fa-windows";
-                        }
-                        if (bot.OS.toLowerCase().indexOf("mac") >= 0){
-                            symbol = "fa-apple";
-                        }
-                    }
-                    var q = "";
-                    $.each(bot.cmd_queue, function(j, cmd){
-                        q += j+1 + ". " + cmd + "\n";
-                    });
-                    $('#cmdq').html(q);
-                    $('#botid').val(i);
-                    $('#lastResponse').html(bot.last_response);
-                    $('#cliOS').html("<i class=\"fa " + symbol + "\"></i> " + bot.OS);
+                    set_modal_data(i, bot);
                     $('#modal-pop').modal('toggle');
                 });
+                if (($("#modal-pop").data('bs.modal') || {}).isShown){
+                    set_modal_data(i, bot);
+                }
             });
             $.each(check, function(){
                 $('input:checkbox[name=botcb][value=' + this.value + ']').prop("checked", true);
             });
         }
     });
+}
+
+function get_symbol(bot){
+    var symbol = "fa-question";
+    if (bot.OS){
+        if (bot.OS.toLowerCase().indexOf("linux") >= 0){
+            symbol = "fa-linux";
+        }
+        if (bot.OS.toLowerCase().indexOf("unix") >= 0){
+            symbol = "fa-terminal";
+        }
+        if (bot.OS.toLowerCase().indexOf("windows") >= 0){
+            symbol = "fa-windows";
+        }
+        if (bot.OS.toLowerCase().indexOf("mac") >= 0){
+            symbol = "fa-apple";
+        }
+    }
+    return symbol;
+}
+
+function set_modal_data(i, bot, symbol){
+    var q = "";
+    $.each(bot.cmd_queue, function(j, cmd){
+        q += j+1 + ". " + cmd + "\n";
+    });
+    $('#cmdq').html(q);
+    $('#botid').val(i);
+    $('#lastResponse').html(bot.last_response);
+    $('#cliOS').html("<i class=\"fa " + get_symbol(bot) + "\"></i> " + bot.OS);
 }
 
 function modal_tabs(e) {
@@ -111,6 +122,16 @@ function delete_bot(e){
     });
 }
 
+function kill_bot(e){
+    $.ajax({
+        url: '/api/clients/kill/' + $('#botid').val(),
+        type: 'GET',
+        success: function (data, textStatus, xhr) {
+            $('#modal-pop').modal('toggle');
+        }
+    });
+}
+
 function clearq_bot(e){
     $.ajax({
         url: '/api/clients/clearq/' + $('#botid').val(),
@@ -138,6 +159,18 @@ function delete_all_checked(e){
     $('input:checkbox[name="botcb"]:checked').each(function(){
         $.ajax({
             url: '/api/clients/delete/' + $(this).prop("value"),
+            type: 'GET',
+        });
+    });
+}
+
+function kill_all_checked(e){
+    if (!confirm("Are you sure you want to delete all checked bots?")){
+        return;
+    }
+    $('input:checkbox[name="botcb"]:checked').each(function(){
+        $.ajax({
+            url: '/api/clients/kill/' + $(this).prop("value"),
             type: 'GET',
         });
     });

