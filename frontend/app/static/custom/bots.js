@@ -40,7 +40,7 @@ function clients_list(){
                     }
                     var q = "";
                     $.each(bot.cmd_queue, function(j, cmd){
-                        q += j + ". " + cmd + "\n";
+                        q += j+1 + ". " + cmd + "\n";
                     });
                     $('#cmdq').html(q);
                     $('#botid').val(i);
