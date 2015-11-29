@@ -37,9 +37,9 @@ def handle_client(sock, addr):
         queue.update({addr[0]:list()})
         b.sleep_interval = None
     b.last_seen_time = datetime.now()
-    if b.os == None:
+    if b.os == None and not "get os" in queue[addr[0]]:
         queue[addr[0]].append("get os")
-    if b.sleep_interval == None:
+    if b.sleep_interval == None and not "get sleep" in queue[addr[0]]:
         queue[addr[0]].append("get sleep")
     db.session.add(b)
     db.session.commit()
