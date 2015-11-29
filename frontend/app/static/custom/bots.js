@@ -105,7 +105,6 @@ function submit_to_api(e){
         contentType: "application/json",
         data: jdata,
         success: function (data, textStatus, xhr) {
-            $('#modal-pop').modal('toggle');
             $('.nav-tabs a[href="#last-response"]').tab('show')
             $('#interval').val("");
             $('#command').val("");
