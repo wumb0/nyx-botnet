@@ -40,7 +40,8 @@ def testcmd():
 @app.route("/api/clients/list", methods=["GET"])
 @login_required
 def api_clients_list():
-    bots = [ Bot.query.filter_by(ip=c).one() for c in g.queue.keys() ]
+    bots = Bot.query.all()
+    #bots = [ Bot.query.filter_by(ip=c).one() for c in g.queue.keys() ]
     data = {}
     for bot in bots:
         data[bot.id] = dict()
@@ -50,7 +51,9 @@ def api_clients_list():
         data[bot.id]["last_command"] = bot.last_command
         data[bot.id]["last_response"] = bot.last_response
         data[bot.id]["set_interval"] = bot.sleep_interval
-        data[bot.id]["cmd_queue"] = g.queue[bot.ip]
+        if bot.ip in g.queue.keys():
+            data[bot.id]["cmd_queue"] = g.queue[bot.ip]
+        else: data[bot.id]["cmd_queue"] = []
     return json.dumps(data)
 
 @app.route("/api/clients/cmd/<int:id>", methods=["POST"])
