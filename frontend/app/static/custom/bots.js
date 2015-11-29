@@ -183,3 +183,9 @@ function sleep_all_checked(e){
         });
     });
 }
+
+function submit_on_enter(e){
+    if(e.keyCode == 13){
+        $("#submit-btn").click();
+    }
+}

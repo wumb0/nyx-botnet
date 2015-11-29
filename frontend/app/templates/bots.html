@@ -96,6 +96,8 @@ $(document).ready(function() {
     $('#cmdall').click(command_all_checked);
     $('#sleepall').click(sleep_all_checked);
     $('#clearqall').click(clearq_all_checked);
+    $("#command").keyup(submit_on_enter);
+    $("#interval").keyup(submit_on_enter);
 });
 </script>
 {% endblock footer %}
