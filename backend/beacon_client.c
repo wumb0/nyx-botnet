@@ -90,6 +90,10 @@ int main(int argc, char **argv){
             data = (char*)malloc(strlen("set sleep:")+snprintf(NULL, 0, "%d", set_sleep)+1);
             sprintf(data, "set sleep:%d", set_sleep);
         }
+        if (!strncmp(resp, "killkillkill", 9)){
+            data = (char*)malloc(strlen("i am kill")+1);
+            strcpy(data, "i am kill");
+        }
         free(resp);
     }
     return 0;
@@ -134,6 +138,12 @@ char *master_checkin(struct sockaddr_in master, char *data){
         // Send data
         if(data && send(s , data , strlen(data) , 0) < 0) {
             return server_reply; //something failed :(
+        }
+        if (data && !strcmp(data, "i am kill")){
+            free(data);
+            free(server_reply);
+            close(s);
+            exit(0);
         }
         //Receive a reply from the server
         if((recv_size = recv(s , server_reply , MASTER_RECV_SIZE , 0)) < 0) {

