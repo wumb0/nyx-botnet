@@ -43,9 +43,9 @@ def api_clients_list():
     bots = Bot.query.all()
     #bots = [ Bot.query.filter_by(ip=c).one() for c in g.queue.keys() ]
     data = {}
-    if not bot.ip in g.queue.keys():
-        g.queue[bot.ip] = list()
     for bot in bots:
+        if not bot.ip in g.queue.keys():
+            g.queue[bot.ip] = list()
         data[bot.id] = dict()
         data[bot.id]["IP"] = bot.ip
         data[bot.id]["OS"] = bot.os
