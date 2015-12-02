@@ -1,7 +1,7 @@
 all: client server
 
 client:
-	gcc -Wall -Wextra -std=c99 beacon_client.c -o beacon_client
+	gcc -g -Wall -Wextra -std=c99 beacon_client.c -o beacon_client
 
 server:
 	gcc -Wall -Wextra -pthread -std=c99 menu.c command.c client.c beacon_server.c -o beacon_server
