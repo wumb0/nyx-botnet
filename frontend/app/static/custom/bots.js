@@ -30,7 +30,7 @@ function clients_list(){
                 } else {
                     $('#row'+i+">td").wrapInner('<s></s>');
                 }
-                if (($("#modal-pop").data('bs.modal') || {}).isShown){
+                if (($("#modal-pop").data('bs.modal') || {}).isShown && $('#botid').val() == i){
                     set_modal_data(i, bot);
                 }
             });
