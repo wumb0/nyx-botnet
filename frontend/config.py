@@ -19,4 +19,6 @@ SQLALCHEMY_TRACK_MODIFICATIONS=False
 #get constants from file
 SECRET_KEY = f.readline().strip()
 SECURITY_PASSWORD_SALT=f.readline().strip()
+FIRST_USER_NAME=f.readline().strip()
+FIRST_USER_PASS=f.readline().strip()
 f.close()

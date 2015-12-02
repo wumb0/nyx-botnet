@@ -7,6 +7,7 @@ from flask.ext.admin import Admin
 from flask_admin.base import MenuLink
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask_wtf.csrf import CsrfProtect
+from config import FIRST_USER_PASS, FIRST_USER_NAME
 
 # Initialize the app and database, import the config
 app = Flask(__name__)
@@ -21,7 +22,7 @@ userstore = SQLAlchemyUserDatastore(db, models.User, None)
 sec = Security(app, userstore)
 db.create_all()
 try:
-    userstore.create_user(email="root@localhost", password="pwnsauce")
+    userstore.create_user(email=FIRST_USER_NAME, password=FIRST_USER_PASS)
     db.session.commit()
 except: pass
 from app.views import main, admin
