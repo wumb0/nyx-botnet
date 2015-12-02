@@ -50,8 +50,8 @@ def handle_client(sock, addr):
         cmd = queue[addr[0]][0]
         queue[addr[0]].remove(cmd)
         sock.send(cmd)
-        b.last_command = cmd
-        b.last_response = ""
+        b.last_command = b.current_command
+        b.current_command = cmd
         db.session.add(b)
         db.session.commit()
     sock.close()

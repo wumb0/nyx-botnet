@@ -33,6 +33,7 @@ class Bot(db.Model):
     last_seen_time = db.Column(db.DateTime())
     sleep_interval = db.Column(db.Integer())
     last_command = db.Column(db.String(10000))
+    current_command = db.Column(db.String(10000))
 
     def __str__(self):
         return self.ip

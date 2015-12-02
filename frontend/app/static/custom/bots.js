@@ -67,7 +67,7 @@ function set_modal_data(i, bot){
     });
     $('#cmdq').html(q);
     $('#botid').val(i);
-    $('#lastResponse').html("Command: " + bot.last_command + "\nResponse:\n" + bot.last_response);
+    $('#lastResponse').html("Current Command: " + bot.current_command + "\nLast Command: " + bot.last_command + "\nResponse:\n" + bot.last_response);
     $('#cliOS').html("<i class=\"fa " + get_symbol(bot) + "\"></i> " + bot.OS);
 }
 
