@@ -114,3 +114,11 @@ def bots():
     cmd_form = RunCommand()
     int_form = SetSleepInterval()
     return render_template("bots.html", title="Bots", cmd_form=cmd_form, int_form=int_form, bots=bots)
+
+@app.errorhandler(404)
+def err404(e):
+    return render_template("404.html", title="Stop it.")
+
+@app.errorhandler(500)
+def err500(e):
+    return render_template("500.html", title="..........")
