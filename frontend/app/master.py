@@ -65,8 +65,8 @@ def action(data, bot):
         db.session.commit()
         del queue[bot.ip]
         return
-    elif data != "":
+    if data != "":
         bot.last_command = bot.current_command
-        bot.last_response = data
+        bot.last_response = data.decode('utf-8', 'ignore')
     db.session.add(bot)
     db.session.commit()
