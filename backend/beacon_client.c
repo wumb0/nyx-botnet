@@ -12,11 +12,9 @@ int main(int argc, char **argv){
     #endif
     master_init(&master);
     while ( 1 ) {
+            int sleep_time = (rand() % (int)(set_sleep*0.15+1)) + set_sleep;
         #ifdef CLIENT_DEBUG
-            int sleep_time = (rand() % (int)(set_sleep*0.15+1)) + set_sleep;
             printf("Sleeping for %d seconds... ", sleep_time);
-        #else
-            int sleep_time = (rand() % (int)(set_sleep*0.15+1)) + set_sleep;
         #endif
 
         #if defined(__apple__) || defined(__linux__) || defined(__unix__)
