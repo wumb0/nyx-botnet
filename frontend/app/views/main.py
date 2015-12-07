@@ -108,6 +108,7 @@ def api_clients_delete(id):
 @login_required
 def bots():
     bots = Bot.query.all()
+    bots = [ x for x in bots if x.last_command is not None and x.os is not None ]
     cmd_form = RunCommand()
     int_form = SetSleepInterval()
     return render_template("bots.html", title="Bots", cmd_form=cmd_form, int_form=int_form, bots=bots)
