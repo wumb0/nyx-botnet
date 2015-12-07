@@ -24,7 +24,7 @@ db.create_all()
 try:
     userstore.create_user(email=FIRST_USER_NAME, password=FIRST_USER_PASS)
     db.session.commit()
-except: pass
+except: db.session.rollback()
 from app.views import main, admin
 
 #admin setup
