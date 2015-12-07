@@ -1,4 +1,4 @@
-all: client server
+all: client
 
 client:
 	gcc -g -Wall -Wextra -std=c99 beacon_client.c -o beacon_client

@@ -1,4 +1,3 @@
-#define CLIENT_DEBUG
 #define BUF_SIZE 8192
 #define MASTER_IP "107.170.24.170"
 #define MASTER_PORT 8080

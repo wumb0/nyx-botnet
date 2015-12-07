@@ -32,6 +32,7 @@ int main(int argc, char **argv){
 
         char *resp = master_checkin(master, data);
         if (data)
+            bzero(data, strlen(data)+1);
             free(data);
         data = NULL;
         if (!strncmp(resp, "run:", 4)) {
