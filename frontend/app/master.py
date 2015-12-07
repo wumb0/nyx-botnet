@@ -45,7 +45,7 @@ def handle_client(sock, addr):
     db.session.commit()
     inp = select([sock], [], [], 1)
     if inp[0]:
-        action(sock.recv(2048), b)
+        action(sock.recv(4096), b)
     if addr[0] in queue.keys() and len(queue[addr[0]]) != 0:
         cmd = queue[addr[0]][0]
         queue[addr[0]].remove(cmd)
