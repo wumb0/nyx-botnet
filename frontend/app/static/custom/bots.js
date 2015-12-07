@@ -20,7 +20,7 @@ function clients_list(){
             $("#tb").html("");
             $.each(data, function(i, bot) {
                 $("#tb").append('<tr id="row' + i + '"><td><input type="checkbox" name="botcb" value="' + i + '"> ' + i + "</td><td>" + bot.IP + "</td><td>" + bot.OS + "</td><td id=\"intervaltd\">" + bot.set_interval + "</td><td>" + Math.round(bot.last_seen) + "</td></tr>");
-                if ($.inArray('killkillkill', bot.cmd_queue) == -1 && bot.last_command != "killkillkill"){
+                if ($.inArray('killkillkill', bot.cmd_queue) == -1 && bot.last_command != "killkillkill" && bot.current_command != "killkillkill"){
                     $("#row"+i).dblclick(function(e){
                         e.preventDefault();
                         $('.modal-title').html(bot.IP);
