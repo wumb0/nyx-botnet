@@ -6,6 +6,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 #get private application resources
 f = open(os.path.join(basedir, 'app.vars') , 'r')
 
+#security stuff
 CSRF_ENABLED = True
 WTF_CSRF_ENABLED = True
 SECURITY_PASSWORD_HASH='pbkdf2_sha512'
@@ -18,7 +19,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS=False
 
 #get constants from file
 SECRET_KEY = f.readline().strip()
-SECURITY_PASSWORD_SALT=f.readline().strip()
-FIRST_USER_NAME=f.readline().strip()
-FIRST_USER_PASS=f.readline().strip()
+SECURITY_PASSWORD_SALT = f.readline().strip()
+FIRST_USER_NAME = f.readline().strip()
+FIRST_USER_PASS = f.readline().strip()
 f.close()

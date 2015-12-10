@@ -16,7 +16,7 @@ db = SQLAlchemy(app)
 CsrfProtect(app)
 app.killswitch = 0
 
-#this starts the app
+# setup db, create the db, setup security, and add first user
 from app import models
 userstore = SQLAlchemyUserDatastore(db, models.User, None)
 sec = Security(app, userstore)
@@ -25,6 +25,8 @@ try:
     userstore.create_user(email=FIRST_USER_NAME, password=FIRST_USER_PASS)
     db.session.commit()
 except: db.session.rollback()
+
+#this loads all views
 from app.views import main, admin
 
 #admin setup
@@ -32,3 +34,4 @@ _admin = Admin(app, 'NYX Admin', template_mode='bootstrap3',
               index_view=admin.ProtectedIndexView())
 _admin.add_link(MenuLink(name='Back to Site', url='/'))
 _admin.add_view(admin.UserModelView(models.User, db.session))
+_admin.add_view(admin.BotModelView(models.Bot, db.session))

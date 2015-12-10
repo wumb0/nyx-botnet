@@ -4,6 +4,7 @@ from flask.ext.security import UserMixin
 from datetime import datetime
 
 class User(db.Model, UserMixin):
+    """Defines a user, all users have the same permission level"""
     id = db.Column(db.Integer(), primary_key=True)
     email = db.Column(db.String(255), index=True, unique=True)
     password = db.Column(db.String(255))
@@ -26,6 +27,7 @@ class User(db.Model, UserMixin):
         pass
 
 class Bot(db.Model):
+    """Defines a bot in the database"""
     id = db.Column(db.Integer(), primary_key=True)
     ip = db.Column(db.String(50))
     os = db.Column(db.String(50))
